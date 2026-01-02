@@ -100,7 +100,7 @@
             border-radius: 12px; 
             width: 400px; 
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
-            position: relative; /* For absolute positioning of X button */
+            position: relative; 
         }
         
         .close-modal-x {
@@ -131,11 +131,12 @@
 <div class="container">
     <header>
         <div style="display:flex; align-items:center; gap:15px;">
-            <h1>MANGA System Design</h1>
+            <h1>MANGA System Design <span style="color:#60a5fa">PRO</span></h1>
             <span id="globalStats" style="font-size:0.9rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px;">0%</span>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
             <span id="syncStatus" style="font-size:0.8rem; opacity:0.8;">⚪ Local</span>
+            <button class="btn" onclick="loadFromGist()">🔄 Sync Now</button>
             <button class="btn" onclick="toggleModal()">⚙️ Settings</button>
         </div>
     </header>
@@ -174,11 +175,9 @@
 </div>
 
 <script>
-    // --- DIRECT RESOURCES ---
     const gh = "https://github.com/donnemartin/system-design-primer";
     const google = (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
     
-    // High-quality direct links
     const LINKS = {
         ddia_sum: "https://github.com/vonbromssen/ddia-summary",
         latency: "https://github.com/sirupsen/napkin-math",
@@ -199,275 +198,136 @@
         phase1: [
             {
                 w: "W1", focus: "Scalability Basics",
-                res: [
-                    {t: "DDIA Summary (Ch 1)", u: LINKS.ddia_sum},
-                    {t: "Latency Numbers (Napkin Math)", u: LINKS.latency},
-                    {t: "Performance vs Scalability", u: `${gh}#performance-vs-scalability`}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "Define Reliability, Scalability, Maintainability."},
-                    {tag: "MATH", txt: "Memorize: 1ms = 10^6 ns. SSD read ~100µs. Round trip ~150ms."},
-                    {tag: "CODE", txt: "Script: Measure local disk IOPS vs Memory access speed."},
-                    {tag: "CORE", txt: "Vertical (Scale Up) vs Horizontal (Scale Out) trade-offs."}
-                ]
+                res: [{t: "DDIA Summary (Ch 1)", u: LINKS.ddia_sum}, {t: "Latency Numbers (Napkin Math)", u: LINKS.latency}, {t: "Performance vs Scalability", u: `${gh}#performance-vs-scalability`}],
+                tasks: [{tag: "CORE", txt: "Define Reliability, Scalability, Maintainability."}, {tag: "MATH", txt: "Memorize: 1ms = 10^6 ns. SSD read ~100µs. Round trip ~150ms."}, {tag: "CODE", txt: "Script: Measure local disk IOPS vs Memory access speed."}, {tag: "CORE", txt: "Vertical (Scale Up) vs Horizontal (Scale Out) trade-offs."}]
             },
             {
                 w: "W2", focus: "Load Balancing & Caching",
-                res: [
-                    {t: "Inside NGINX Architecture", u: LINKS.nginx},
-                    {t: "Scaling Memcache (Facebook)", u: LINKS.memcached},
-                    {t: "Caching Patterns", u: `${gh}#caching`}
-                ],
-                tasks: [
-                    {tag: "CODE", txt: "Config NGINX: Round Robin vs Least Connections."},
-                    {tag: "CORE", txt: "L4 vs L7 Load Balancing. When to use which?"},
-                    {tag: "CORE", txt: "Cache Patterns: Aside, Read-Through, Write-Back."},
-                    {tag: "CORE", txt: "Thundering Herd Problem: Solution strategies."}
-                ]
+                res: [{t: "Inside NGINX Architecture", u: LINKS.nginx}, {t: "Scaling Memcache (Facebook)", u: LINKS.memcached}, {t: "Caching Patterns", u: `${gh}#caching`}],
+                tasks: [{tag: "CODE", txt: "Config NGINX: Round Robin vs Least Connections."}, {tag: "CORE", txt: "L4 vs L7 Load Balancing. When to use which?"}, {tag: "CORE", txt: "Cache Patterns: Aside, Read-Through, Write-Back."}, {tag: "CORE", txt: "Thundering Herd Problem: Solution strategies."}]
             },
             {
                 w: "W3", focus: "Database Internals",
-                res: [
-                    {t: "DDIA Summary (Ch 3)", u: LINKS.ddia_sum},
-                    {t: "PostgreSQL Architecture", u: "https://www.postgresql.org/docs/current/overview.html"}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "B-Trees (SQL) vs LSM-Trees (NoSQL/Cassandra)."},
-                    {tag: "CODE", txt: "Postgres: Use EXPLAIN ANALYZE to optimize a query."},
-                    {tag: "CORE", txt: "ACID Isolation Levels: Read Committed vs Serializable."},
-                    {tag: "CORE", txt: "Bloom Filters: How they prevent disk reads."}
-                ]
+                res: [{t: "DDIA Summary (Ch 3)", u: LINKS.ddia_sum}, {t: "PostgreSQL Architecture", u: "https://www.postgresql.org/docs/current/overview.html"}],
+                tasks: [{tag: "CORE", txt: "B-Trees (SQL) vs LSM-Trees (NoSQL/Cassandra)."}, {tag: "CODE", txt: "Postgres: Use EXPLAIN ANALYZE to optimize a query."}, {tag: "CORE", txt: "ACID Isolation Levels: Read Committed vs Serializable."}, {tag: "CORE", txt: "Bloom Filters: How they prevent disk reads."}]
             },
             {
                 w: "W4", focus: "Replication & Sharding",
-                res: [
-                    {t: "DDIA Summary (Ch 5 & 6)", u: LINKS.ddia_sum},
-                    {t: "Sharding", u: `${gh}#sharding`}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "Single Leader vs Multi-Leader vs Leaderless."},
-                    {tag: "CORE", txt: "Replication Lag & Read-Your-Own-Writes consistency."},
-                    {tag: "CODE", txt: "Design Consistent Hashing ring (Handle node add/remove)."},
-                    {tag: "CORE", txt: "Key-Range vs Hash Partitioning trade-offs."}
-                ]
+                res: [{t: "DDIA Summary (Ch 5 & 6)", u: LINKS.ddia_sum}, {t: "Sharding", u: `${gh}#sharding`}],
+                tasks: [{tag: "CORE", txt: "Single Leader vs Multi-Leader vs Leaderless."}, {tag: "CORE", txt: "Replication Lag & Read-Your-Own-Writes consistency."}, {tag: "CODE", txt: "Design Consistent Hashing ring (Handle node add/remove)."}, {tag: "CORE", txt: "Key-Range vs Hash Partitioning trade-offs."}]
             },
             {
                 w: "W5", focus: "Consistency & CAP",
-                res: [
-                    {t: "CAP Theorem", u: `${gh}#cap-theorem`},
-                    {t: "Strong vs Eventual Consistency", u: "https://www.werner-vogels.com/2008/12/eventually-consistent.html"}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "Why 'CA' is impossible in distributed systems."},
-                    {tag: "CORE", txt: "PACELC Theorem: Latency vs Consistency."},
-                    {tag: "CORE", txt: "2-Phase Commit (2PC) vs Saga Pattern."},
-                    {tag: "CODE", txt: "Write pseudo-code for a Check-then-Act race condition."}
-                ]
+                res: [{t: "CAP Theorem", u: `${gh}#cap-theorem`}, {t: "Strong vs Eventual Consistency", u: "https://www.werner-vogels.com/2008/12/eventually-consistent.html"}],
+                tasks: [{tag: "CORE", txt: "Why 'CA' is impossible in distributed systems."}, {tag: "CORE", txt: "PACELC Theorem: Latency vs Consistency."}, {tag: "CORE", txt: "2-Phase Commit (2PC) vs Saga Pattern."}, {tag: "CODE", txt: "Write pseudo-code for a Check-then-Act race condition."}]
             },
             {
                 w: "W6", focus: "Communication Protocols",
-                res: [
-                    {t: "gRPC Documentation", u: "https://grpc.io/docs/what-is-grpc/introduction/"},
-                    {t: "GraphQL vs REST", u: "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "REST (JSON) vs gRPC (Protobuf) performance."},
-                    {tag: "CORE", txt: "WebSockets vs Server-Sent Events (SSE)."},
-                    {tag: "CODE", txt: "Define a .proto file and generate Go/Python code."},
-                    {tag: "CORE", txt: "Idempotency: Implementing with Idempotency Keys."}
-                ]
+                res: [{t: "gRPC Documentation", u: "https://grpc.io/docs/what-is-grpc/introduction/"}, {t: "GraphQL vs REST", u: "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}],
+                tasks: [{tag: "CORE", txt: "REST (JSON) vs gRPC (Protobuf) performance."}, {tag: "CORE", txt: "WebSockets vs Server-Sent Events (SSE)."}, {tag: "CODE", txt: "Define a .proto file and generate Go/Python code."}, {tag: "CORE", txt: "Idempotency: Implementing with Idempotency Keys."}]
             },
             {
                 w: "W7", focus: "Async & Queues",
-                res: [
-                    {t: "Kafka Introduction", u: LINKS.kafka},
-                    {t: "RabbitMQ Concepts", u: "https://www.rabbitmq.com/tutorials/amqp-concepts.html"}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "Kafka (Log) vs RabbitMQ (Queue). Smart vs Dumb broker."},
-                    {tag: "CORE", txt: "Kafka Ordering Guarantees (Topic Partitions)."},
-                    {tag: "CORE", txt: "Backpressure: Handling overwhelmed consumers."},
-                    {tag: "CORE", txt: "At-Most-Once vs At-Least-Once vs Exactly-Once."}
-                ]
+                res: [{t: "Kafka Introduction", u: LINKS.kafka}, {t: "RabbitMQ Concepts", u: "https://www.rabbitmq.com/tutorials/amqp-concepts.html"}],
+                tasks: [{tag: "CORE", txt: "Kafka (Log) vs RabbitMQ (Queue). Smart vs Dumb broker."}, {tag: "CORE", txt: "Kafka Ordering Guarantees (Topic Partitions)."}, {tag: "CORE", txt: "Backpressure: Handling overwhelmed consumers."}, {tag: "CORE", txt: "At-Most-Once vs At-Least-Once vs Exactly-Once."}]
             },
             {
                 w: "W8", focus: "Phase 1 Review",
                 res: [{t: "System Design Primer", u: gh}],
-                tasks: [
-                    {tag: "TEST", txt: "Design URL Shortener DB Schema + Capacity Plan."},
-                    {tag: "TEST", txt: "Explain HTTPS Handshake step-by-step."},
-                    {tag: "ADMIN", txt: "Verify W1-W7 tasks are green."}
-                ]
+                tasks: [{tag: "TEST", txt: "Design URL Shortener DB Schema + Capacity Plan."}, {tag: "TEST", txt: "Explain HTTPS Handshake step-by-step."}, {tag: "ADMIN", txt: "Verify W1-W7 tasks are green."}]
             }
         ],
         phase2: [
             {
                 w: "W9", focus: "KV Stores & Dynamo",
                 res: [{t: "Dynamo Paper (Amazon)", u: LINKS.dynamo}],
-                tasks: [
-                    {tag: "CORE", txt: "Read Dynamo Paper: Gossip, Hinted Handoff, Sloppy Quorum."},
-                    {tag: "MATH", txt: "Calc data loss prob (Replication Factor=3)."},
-                    {tag: "CORE", txt: "Vector Clocks: Merging divergent histories."},
-                    {tag: "CODE", txt: "Implement Consistent Hashing with Virtual Nodes."}
-                ]
+                tasks: [{tag: "CORE", txt: "Read Dynamo Paper: Gossip, Hinted Handoff, Sloppy Quorum."}, {tag: "MATH", txt: "Calc data loss prob (Replication Factor=3)."}, {tag: "CORE", txt: "Vector Clocks: Merging divergent histories."}, {tag: "CODE", txt: "Implement Consistent Hashing with Virtual Nodes."}]
             },
             {
                 w: "W10", focus: "ID Gen & Rate Limiting",
                 res: [{t: "Twitter Snowflake", u: LINKS.snowflake}],
-                tasks: [
-                    {tag: "CORE", txt: "UUID vs Auto-Increment vs Snowflake (Sortable)."},
-                    {tag: "CORE", txt: "Sharded Counters (Write contention solution)."},
-                    {tag: "CODE", txt: "Design Redis Rate Limiter (Lua Script)."},
-                    {tag: "CORE", txt: "Token Bucket vs Leaky Bucket algorithms."}
-                ]
+                tasks: [{tag: "CORE", txt: "UUID vs Auto-Increment vs Snowflake (Sortable)."}, {tag: "CORE", txt: "Sharded Counters (Write contention solution)."}, {tag: "CODE", txt: "Design Redis Rate Limiter (Lua Script)."}, {tag: "CORE", txt: "Token Bucket vs Leaky Bucket algorithms."}]
             },
             {
                 w: "W11", focus: "Search & Crawling",
                 res: [{t: "Web Crawler Design", u: `${gh}#design-a-web-crawler`}],
-                tasks: [
-                    {tag: "CORE", txt: "Inverted Index: Tokenization & Stop Words."},
-                    {tag: "CORE", txt: "Crawler: URL Frontier & Politeness."},
-                    {tag: "CORE", txt: "SimHash / Fingerprinting for deduplication."},
-                    {tag: "CODE", txt: "Design Trie for Autocomplete (Typeahead)."}
-                ]
+                tasks: [{tag: "CORE", txt: "Inverted Index: Tokenization & Stop Words."}, {tag: "CORE", txt: "Crawler: URL Frontier & Politeness."}, {tag: "CORE", txt: "SimHash / Fingerprinting for deduplication."}, {tag: "CODE", txt: "Design Trie for Autocomplete (Typeahead)."}]
             },
             {
                 w: "W12", focus: "Distributed Caching",
                 res: [{t: "Scaling Memcache", u: LINKS.memcached}],
-                tasks: [
-                    {tag: "CORE", txt: "Leases: Solving Stale Sets (Memcache paper)."},
-                    {tag: "CORE", txt: "Celebrity/Hot Key problem solutions."},
-                    {tag: "CORE", txt: "Cache Penetration (Bloom Filters) & Avalanche."}
-                ]
+                tasks: [{tag: "CORE", txt: "Leases: Solving Stale Sets (Memcache paper)."}, {tag: "CORE", txt: "Celebrity/Hot Key problem solutions."}, {tag: "CORE", txt: "Cache Penetration (Bloom Filters) & Avalanche."}]
             },
             {
                 w: "W13", focus: "Distributed File Systems",
-                res: [
-                    {t: "GFS Paper", u: LINKS.gfs},
-                    {t: "S3 Architecture", u: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "GFS: Master (Metadata) vs Chunkserver (Data)."},
-                    {tag: "CORE", txt: "Write Flow: Client -> Master -> Primary -> Secondaries."},
-                    {tag: "CORE", txt: "Block Storage vs File (NFS) vs Object (S3)."},
-                    {tag: "CORE", txt: "Erasure Coding vs Replication."}
-                ]
+                res: [{t: "GFS Paper", u: LINKS.gfs}, {t: "S3 Architecture", u: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"}],
+                tasks: [{tag: "CORE", txt: "GFS: Master (Metadata) vs Chunkserver (Data)."}, {tag: "CORE", txt: "Write Flow: Client -> Master -> Primary -> Secondaries."}, {tag: "CORE", txt: "Block Storage vs File (NFS) vs Object (S3)."}, {tag: "CORE", txt: "Erasure Coding vs Replication."}]
             },
             {
                 w: "W14", focus: "Chat Systems",
                 res: [{t: "Discord: Trillions of Messages", u: LINKS.discord}],
-                tasks: [
-                    {tag: "CORE", txt: "WebSocket vs XMPP vs MQTT."},
-                    {tag: "CORE", txt: "User Presence (Heartbeat + Redis TTL)."},
-                    {tag: "CORE", txt: "Discord's migration: MongoDB -> Cassandra -> ScyllaDB."},
-                    {tag: "CORE", txt: "Fan-out: Group Chat scaling."}
-                ]
+                tasks: [{tag: "CORE", txt: "WebSocket vs XMPP vs MQTT."}, {tag: "CORE", txt: "User Presence (Heartbeat + Redis TTL)."}, {tag: "CORE", txt: "Discord's migration: MongoDB -> Cassandra -> ScyllaDB."}, {tag: "CORE", txt: "Fan-out: Group Chat scaling."}]
             },
             {
                 w: "W15", focus: "Consensus (Raft/Paxos)",
-                res: [
-                    {t: "Raft Visualization", u: "https://thesecretlivesofdata.com/raft/"},
-                    {t: "Raft Paper/Site", u: LINKS.raft}
-                ],
-                tasks: [
-                    {tag: "CORE", txt: "Leader Election & Log Replication."},
-                    {tag: "CORE", txt: "Split Brain & Fencing Tokens."},
-                    {tag: "CORE", txt: "ZooKeeper Use Cases (Config, Locking)."},
-                    {tag: "CODE", txt: "Distributed Lock with Redis (Redlock)."}
-                ]
+                res: [{t: "Raft Visualization", u: "https://thesecretlivesofdata.com/raft/"}, {t: "Raft Paper/Site", u: LINKS.raft}],
+                tasks: [{tag: "CORE", txt: "Leader Election & Log Replication."}, {tag: "CORE", txt: "Split Brain & Fencing Tokens."}, {tag: "CORE", txt: "ZooKeeper Use Cases (Config, Locking)."}, {tag: "CODE", txt: "Distributed Lock with Redis (Redlock)."}]
             },
             {
                 w: "W16", focus: "Phase 2 Review",
                 res: [{t: "Review Phase 2", u: "#"}],
-                tasks: [
-                    {tag: "TEST", txt: "Draw Rate Limiter Architecture."},
-                    {tag: "TEST", txt: "Draw Typeahead System Architecture."},
-                    {tag: "ADMIN", txt: "Verify W9-W15 tasks are green."}
-                ]
+                tasks: [{tag: "TEST", txt: "Draw Rate Limiter Architecture."}, {tag: "TEST", txt: "Draw Typeahead System Architecture."}, {tag: "ADMIN", txt: "Verify W9-W15 tasks are green."}]
             }
         ],
         phase3: [
             {
                 w: "W17", focus: "Design Twitter/NewsFeed",
                 res: [{t: "FB Feed Architecture", u: LINKS.fb_feed}],
-                tasks: [
-                    {tag: "CORE", txt: "Fan-out on Write (Push) vs Read (Pull)."},
-                    {tag: "MATH", txt: "Capacity Planning: Storage for 500M DAU."},
-                    {tag: "CORE", txt: "Graph DB (Followers) vs SQL Join."},
-                    {tag: "CORE", txt: "Pagination: Cursor vs Offset."}
-                ]
+                tasks: [{tag: "CORE", txt: "Fan-out on Write (Push) vs Read (Pull)."}, {tag: "MATH", txt: "Capacity Planning: Storage for 500M DAU."}, {tag: "CORE", txt: "Graph DB (Followers) vs SQL Join."}, {tag: "CORE", txt: "Pagination: Cursor vs Offset."}]
             },
             {
                 w: "W18", focus: "Design Netflix/YouTube",
                 res: [{t: "Netflix Tech Blog", u: LINKS.netflix}],
-                tasks: [
-                    {tag: "CORE", txt: "Upload Pipeline: Chunking -> Transcoding -> CDN."},
-                    {tag: "CORE", txt: "Adaptive Bitrate Streaming (DASH/HLS)."},
-                    {tag: "CORE", txt: "Content Delivery: Edge Locations (Open Connect)."}
-                ]
+                tasks: [{tag: "CORE", txt: "Upload Pipeline: Chunking -> Transcoding -> CDN."}, {tag: "CORE", txt: "Adaptive Bitrate Streaming (DASH/HLS)."}, {tag: "CORE", txt: "Content Delivery: Edge Locations (Open Connect)."}]
             },
             {
                 w: "W19", focus: "Design WhatsApp",
                 res: [{t: "E2E Encryption (Signal)", u: "https://signal.org/docs/"}],
-                tasks: [
-                    {tag: "CORE", txt: "E2E: Public/Private Keys & Session Keys."},
-                    {tag: "CORE", txt: "Multi-Device Sync (Offline devices)."},
-                    {tag: "CORE", txt: "Media Uploads (Encrypted Blob + Pointer)."}
-                ]
+                tasks: [{tag: "CORE", txt: "E2E: Public/Private Keys & Session Keys."}, {tag: "CORE", txt: "Multi-Device Sync (Offline devices)."}, {tag: "CORE", txt: "Media Uploads (Encrypted Blob + Pointer)."}]
             },
             {
                 w: "W20", focus: "Design Uber",
                 res: [{t: "Uber Engineering Blog", u: LINKS.uber}],
-                tasks: [
-                    {tag: "CORE", txt: "Geospatial: Quadtree vs Geohash vs S2."},
-                    {tag: "CORE", txt: "Driver Location: High frequency write handling."},
-                    {tag: "CORE", txt: "Matching Service (Radius search)."}
-                ]
+                tasks: [{tag: "CORE", txt: "Geospatial: Quadtree vs Geohash vs S2."}, {tag: "CORE", txt: "Driver Location: High frequency write handling."}, {tag: "CORE", txt: "Matching Service (Radius search)."}]
             },
             {
                 w: "W21", focus: "Design Amazon/Checkout",
                 res: [{t: "Distributed Tx", u: google("Distributed Transaction Patterns")}],
-                tasks: [
-                    {tag: "CORE", txt: "Inventory: Optimistic vs Pessimistic Locking."},
-                    {tag: "CORE", txt: "Idempotency Keys in Payment Processing."},
-                    {tag: "CORE", txt: "Shopping Cart Persistence (Redis/Dynamo)."}
-                ]
+                tasks: [{tag: "CORE", txt: "Inventory: Optimistic vs Pessimistic Locking."}, {tag: "CORE", txt: "Idempotency Keys in Payment Processing."}, {tag: "CORE", txt: "Shopping Cart Persistence (Redis/Dynamo)."}]
             },
             {
                 w: "W22", focus: "Mock Interviews (Peer)",
                 res: [{t: "Pramp", u: "https://www.pramp.com"}],
-                tasks: [
-                    {tag: "ACT", txt: "3 Peer Mocks. Focus: Requirements Gathering."},
-                    {tag: "ACT", txt: "Focus: High Level Design (Buy-in)."},
-                    {tag: "ACT", txt: "Focus: Deep Dive (One complex component)."}
-                ]
+                tasks: [{tag: "ACT", txt: "3 Peer Mocks. Focus: Requirements Gathering."}, {tag: "ACT", txt: "Focus: High Level Design (Buy-in)."}, {tag: "ACT", txt: "Focus: Deep Dive (One complex component)."}]
             },
             {
                 w: "W23", focus: "Mock Interviews (Expert)",
                 res: [{t: "Exponent Channel", u: "https://www.youtube.com/@ExponentTV"}],
-                tasks: [
-                    {tag: "ACT", txt: "Mock 1: Constraint (Low Bandwidth)."},
-                    {tag: "ACT", txt: "Mock 2: Constraint (High Security)."},
-                    {tag: "ACT", txt: "Mock 3: Constraint (Scale 100x)."}
-                ]
+                tasks: [{tag: "ACT", txt: "Mock 1: Constraint (Low Bandwidth)."}, {tag: "ACT", txt: "Mock 2: Constraint (High Security)."}, {tag: "ACT", txt: "Mock 3: Constraint (Scale 100x)."}]
             },
             {
                 w: "W24", focus: "Final Prep",
                 res: [{t: "Resume", u: "#"}],
-                tasks: [
-                    {tag: "ACT", txt: "Prepare 2 'War Stories' (STAR Method)."},
-                    {tag: "ACT", txt: "Rest 24h before interview."},
-                    {tag: "ADMIN", txt: "All Systems Green."}
-                ]
+                tasks: [{tag: "ACT", txt: "Prepare 2 'War Stories' (STAR Method)."}, {tag: "ACT", txt: "Rest 24h before interview."}, {tag: "ADMIN", txt: "All Systems Green."}]
             }
         ]
     };
 
-    // --- LOGIC ---
     let appState = {};
     let GIST_ID = localStorage.getItem('sd_gist_id') || '';
     let GH_TOKEN = localStorage.getItem('sd_gh_token') || '';
 
+    // MODIFIED: Add timestamp to bypass cache
     async function loadFromGist() {
         updateSyncUI(false);
         if (!GIST_ID || !GH_TOKEN) {
@@ -479,8 +339,12 @@
 
         try {
             updateSyncUI("loading");
-            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                headers: { 'Authorization': `token ${GH_TOKEN}` }
+            // CACHE BUSTER ADDED HERE
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${new Date().getTime()}`, {
+                headers: { 
+                    'Authorization': `token ${GH_TOKEN}`,
+                    'Cache-Control': 'no-cache'
+                }
             });
             if (!res.ok) throw new Error("Auth Failed");
             const gist = await res.json();
@@ -623,6 +487,7 @@
         if(tabName.includes('3')) btns[2].classList.add('active');
     }
 
+    // Load on init
     loadFromGist();
 </script>
 </body>
