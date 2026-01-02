@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANGA System Design Master Plan (Cloud Sync)</title>
+    <title>MANGA System Design</title>
     <style>
         :root {
             --primary: #2563eb;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --surface: #ffffff;
-            --text: #334155;
-            --border: #e2e8f0;
-            --success-bg: #dcfce7;
-            --success-text: #166534;
-            --link: #0284c7;
+            --text: #1e293b;
+            --border: #cbd5e1;
+            --link: #0369a1;
+            --tag-code: #f3e8ff; --tag-code-text: #6b21a8;
+            --tag-math: #fff7ed; --tag-math-text: #c2410c;
+            --tag-act: #fee2e2; --tag-act-text: #991b1b;
         }
 
         body {
@@ -22,127 +23,106 @@
             color: var(--text);
             margin: 0;
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: var(--surface);
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            position: relative;
+            border: 1px solid var(--border);
         }
 
         header {
-            background: #1e293b;
+            background: #0f172a;
             color: white;
-            padding: 2.5rem;
-            text-align: center;
-            position: relative;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        h1 { margin: 0; font-size: 2rem; }
-        p.subtitle { margin-top: 0.5rem; opacity: 0.8; }
-
-        /* Settings Button */
-        .settings-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        h1 { margin: 0; font-size: 1.5rem; }
+        
+        .btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
         }
-        .settings-btn:hover { background: rgba(255,255,255,0.2); }
+        .btn:hover { background: rgba(255,255,255,0.2); }
 
-        /* Sync Status Indicator */
-        .sync-status {
-            font-size: 0.8rem;
-            margin-top: 10px;
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.1);
-        }
+        .progress-bar-container { background: #e2e8f0; height: 8px; width: 100%; }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
 
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .input-group input { 
-            width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box;
-        }
-        .btn-save {
-            background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1rem;
-        }
+        .tabs { display: flex; border-bottom: 1px solid var(--border); background: #f1f5f9; }
+        .tab-btn { padding: 1rem 2rem; border: none; background: none; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; }
+        .tab-btn.active { background: white; color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* Progress Bar */
-        .progress-section {
-            padding: 20px 30px;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .progress-track {
-            flex-grow: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; background: var(--primary); width: 0%; transition: width 0.5s;
-        }
-
-        /* Tabs */
-        .tabs { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; overflow-x: auto; }
-        .tab-btn {
-            flex: 1; padding: 1.2rem; border: none; background: none; cursor: pointer; font-weight: 600; color: #64748b; white-space: nowrap;
-            border-bottom: 4px solid transparent;
-        }
-        .tab-btn.active { background: var(--surface); color: var(--primary); border-bottom-color: var(--primary); }
-
-        /* Tables */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .table-wrapper { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+        th { background: #f8fafc; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; position: sticky; top: 0; }
+
+        tr.done-row { background-color: #f0fdf4; }
         
-        th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
-        th { background: #f1f5f9; position: sticky; top: 0; font-size: 0.8rem; text-transform: uppercase; color: #475569; }
+        .task-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; padding: 4px 0; }
+        input[type="checkbox"] { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
 
-        tr.done-row { background-color: var(--success-bg); }
-        .status-badge {
-            padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; background: #e2e8f0; color: #64748b; white-space: nowrap;
+        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-right: 6px; text-transform: uppercase; }
+        .tag-code { background: var(--tag-code); color: var(--tag-code-text); }
+        .tag-math { background: var(--tag-math); color: var(--tag-math-text); }
+        .tag-core { background: #e0f2fe; color: #0369a1; }
+        .tag-act { background: var(--tag-act); color: var(--tag-act-text); }
+
+        .resource-link { display: block; margin-bottom: 6px; color: var(--link); text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+        .resource-link:hover { text-decoration: underline; }
+
+        /* Modal Styles */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
         }
-        .status-badge.complete { background: #22c55e; color: white; }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            width: 400px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+            position: relative; /* For absolute positioning of X button */
+        }
+        
+        .close-modal-x {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close-modal-x:hover { color: #1e293b; }
 
-        /* Tasks */
-        .task-list { list-style: none; padding: 0; margin: 0; }
-        .task-item { display: flex; gap: 10px; margin-bottom: 8px; font-size: 0.95rem; }
-        input[type="checkbox"] { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; }
-        .resource-link { color: var(--link); text-decoration: none; background: #e0f2fe; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin: 2px; }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .input-group input { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }
+        .btn-secondary { background: #94a3b8; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary:hover { opacity: 0.9; }
 
     </style>
 </head>
@@ -150,17 +130,17 @@
 
 <div class="container">
     <header>
-        <h1>System Design Grind</h1>
-        <p class="subtitle">Cloud Synced via GitHub Gist</p>
-        <button class="settings-btn" onclick="toggleModal()">⚙️ Sync Settings</button>
-        <div id="syncStatus" class="sync-status">⚠️ Offline / Not Configured</div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <h1>MANGA System Design</h1>
+            <span id="globalStats" style="font-size:0.9rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px;">0%</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <span id="syncStatus" style="font-size:0.8rem; opacity:0.8;">⚪ Local</span>
+            <button class="btn" onclick="toggleModal()">⚙️ Settings</button>
+        </div>
     </header>
-
-    <div class="progress-section">
-        <span>Progress:</span>
-        <div class="progress-track"><div class="progress-fill" id="globalProgress"></div></div>
-        <div class="progress-stat" id="globalProgressText">0%</div>
-    </div>
+    
+    <div class="progress-bar-container"><div class="progress-bar-fill" id="globalProgress"></div></div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab('phase1')">Phase 1: Fundamentals</button>
@@ -168,199 +148,421 @@
         <button class="tab-btn" onclick="openTab('phase3')">Phase 3: Architecture</button>
     </div>
 
-    <div id="phase1" class="tab-content active"><div class="table-wrapper"><table><tbody id="phase1-body"></tbody></table></div></div>
-    <div id="phase2" class="tab-content"><div class="table-wrapper"><table><tbody id="phase2-body"></tbody></table></div></div>
-    <div id="phase3" class="tab-content"><div class="table-wrapper"><table><tbody id="phase3-body"></tbody></table></div></div>
+    <div id="phase1" class="tab-content active"><table><tbody id="phase1-body"></tbody></table></div>
+    <div id="phase2" class="tab-content"><table><tbody id="phase2-body"></tbody></table></div>
+    <div id="phase3" class="tab-content"><table><tbody id="phase3-body"></tbody></table></div>
 </div>
 
 <div id="configModal" class="modal">
     <div class="modal-content">
-        <h2>Sync Settings</h2>
-        <p style="font-size: 0.9rem; color: #666;">To enable sync across devices, create a <strong>GitHub Gist</strong> and a <strong>Personal Access Token (with 'gist' scope)</strong>.</p>
-        
+        <span class="close-modal-x" onclick="toggleModal()" title="Close">&times;</span>
+        <h2 style="margin-top:0">Sync Configuration</h2>
         <div class="input-group">
-            <label>Gist ID (from URL)</label>
-            <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2..." />
+            <label>Gist ID</label>
+            <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2a..." />
         </div>
         <div class="input-group">
-            <label>GitHub Token (PAT)</label>
+            <label>GitHub Token (Scope: gist)</label>
             <input type="password" id="tokenInput" placeholder="ghp_..." />
         </div>
-        <button class="btn-save" onclick="saveConfig()">Save & Sync</button>
-        <p style="margin-top:10px; font-size:0.8rem; color:#ef4444;">Warning: Your token is saved in your browser's LocalStorage. Do not use on public computers.</p>
+        
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="saveConfig()">Save & Sync</button>
+            <button class="btn-secondary" onclick="toggleModal()">Close</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- CONFIG & STATE ---
-    let appState = {}; 
-    let GIST_ID = localStorage.getItem('sd_gist_id') || '';
-    let GH_TOKEN = localStorage.getItem('sd_gh_token') || '';
-    
-    // --- DATA STRUCTURE ---
-    const ghRepo = "https://github.com/donnemartin/system-design-primer";
+    // --- DIRECT RESOURCES ---
+    const gh = "https://github.com/donnemartin/system-design-primer";
     const google = (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
     
-    // Same data as before, compacted for brevity in this view
+    // High-quality direct links
+    const LINKS = {
+        ddia_sum: "https://github.com/vonbromssen/ddia-summary",
+        latency: "https://github.com/sirupsen/napkin-math",
+        nginx: "https://www.nginx.com/blog/inside-nginx-how-we-designed-for-performance-scale/",
+        memcached: "https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf",
+        dynamo: "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf",
+        gfs: "https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf",
+        kafka: "https://kafka.apache.org/documentation/#introduction",
+        snowflake: "https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake",
+        raft: "https://raft.github.io/",
+        fb_feed: "https://www.infoq.com/presentations/Facebook-Software-Stack/",
+        netflix: "https://netflixtechblog.com/",
+        uber: "https://www.uber.com/en-US/blog/engineering/",
+        discord: "https://discord.com/blog/how-discord-stores-trillions-of-messages"
+    };
+
     const data = {
         phase1: [
-            { w: "W1", focus: "Scalability Basics", res: [{t:"DDIA: Ch 1", u:google("DDIA Ch 1")}], tasks: ["Explain Vertical vs Horizontal scaling", "Calculate latency: Memory vs Disk vs Network", "Memorize 'Power of 2' approximations"] },
-            { w: "W2", focus: "Load Balancing & Caching", res: [{t:"GH: Load Balancer", u:ghRepo+"#load-balancer"}], tasks: ["Configure NGINX locally", "Draw diagram: Where do caches sit?", "Explain LRU vs LFU"] },
-            { w: "W3", focus: "Database Internals", res: [{t:"DDIA: Ch 3", u:google("DDIA Ch 3")}], tasks: ["Explain SSTables vs B-Trees", "Perform ACID transaction in PostgreSQL", "List 3 scenarios NoSQL beats SQL"] },
-            { w: "W4", focus: "Replication & Sharding", res: [{t:"DDIA: Ch 5", u:google("DDIA Ch 5")}], tasks: ["Explain Leader-Follower replication", "Design sharding key strategy", "Explain 'Hot Shard' problem"] },
-            { w: "W5", focus: "CAP & Consistency", res: [{t:"GH: CAP", u:ghRepo+"#cap-theorem"}], tasks: ["Map DBs to CAP triangle", "Write race condition code", "Explain Eventual Consistency"] },
-            { w: "W6", focus: "Protocols", res: [{t:"GH: Comms", u:ghRepo+"#communication"}], tasks: ["Compare Polling vs WebSockets", "Protocol Buffers vs JSON", "GraphQL vs REST"] },
-            { w: "W7", focus: "Async Processing", res: [{t:"GH: Queues", u:ghRepo+"#message-queues"}], tasks: ["RabbitMQ vs Kafka", "Draw async upload flow", "Explain Backpressure"] },
-            { w: "W8", focus: "Review", res: [{t:"Practice", u:"#"}], tasks: ["Design URL Shortener DB", "Review Trade-offs", "Clear W1-W7 tasks"] }
+            {
+                w: "W1", focus: "Scalability Basics",
+                res: [
+                    {t: "DDIA Summary (Ch 1)", u: LINKS.ddia_sum},
+                    {t: "Latency Numbers (Napkin Math)", u: LINKS.latency},
+                    {t: "Performance vs Scalability", u: `${gh}#performance-vs-scalability`}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "Define Reliability, Scalability, Maintainability."},
+                    {tag: "MATH", txt: "Memorize: 1ms = 10^6 ns. SSD read ~100µs. Round trip ~150ms."},
+                    {tag: "CODE", txt: "Script: Measure local disk IOPS vs Memory access speed."},
+                    {tag: "CORE", txt: "Vertical (Scale Up) vs Horizontal (Scale Out) trade-offs."}
+                ]
+            },
+            {
+                w: "W2", focus: "Load Balancing & Caching",
+                res: [
+                    {t: "Inside NGINX Architecture", u: LINKS.nginx},
+                    {t: "Scaling Memcache (Facebook)", u: LINKS.memcached},
+                    {t: "Caching Patterns", u: `${gh}#caching`}
+                ],
+                tasks: [
+                    {tag: "CODE", txt: "Config NGINX: Round Robin vs Least Connections."},
+                    {tag: "CORE", txt: "L4 vs L7 Load Balancing. When to use which?"},
+                    {tag: "CORE", txt: "Cache Patterns: Aside, Read-Through, Write-Back."},
+                    {tag: "CORE", txt: "Thundering Herd Problem: Solution strategies."}
+                ]
+            },
+            {
+                w: "W3", focus: "Database Internals",
+                res: [
+                    {t: "DDIA Summary (Ch 3)", u: LINKS.ddia_sum},
+                    {t: "PostgreSQL Architecture", u: "https://www.postgresql.org/docs/current/overview.html"}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "B-Trees (SQL) vs LSM-Trees (NoSQL/Cassandra)."},
+                    {tag: "CODE", txt: "Postgres: Use EXPLAIN ANALYZE to optimize a query."},
+                    {tag: "CORE", txt: "ACID Isolation Levels: Read Committed vs Serializable."},
+                    {tag: "CORE", txt: "Bloom Filters: How they prevent disk reads."}
+                ]
+            },
+            {
+                w: "W4", focus: "Replication & Sharding",
+                res: [
+                    {t: "DDIA Summary (Ch 5 & 6)", u: LINKS.ddia_sum},
+                    {t: "Sharding", u: `${gh}#sharding`}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "Single Leader vs Multi-Leader vs Leaderless."},
+                    {tag: "CORE", txt: "Replication Lag & Read-Your-Own-Writes consistency."},
+                    {tag: "CODE", txt: "Design Consistent Hashing ring (Handle node add/remove)."},
+                    {tag: "CORE", txt: "Key-Range vs Hash Partitioning trade-offs."}
+                ]
+            },
+            {
+                w: "W5", focus: "Consistency & CAP",
+                res: [
+                    {t: "CAP Theorem", u: `${gh}#cap-theorem`},
+                    {t: "Strong vs Eventual Consistency", u: "https://www.werner-vogels.com/2008/12/eventually-consistent.html"}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "Why 'CA' is impossible in distributed systems."},
+                    {tag: "CORE", txt: "PACELC Theorem: Latency vs Consistency."},
+                    {tag: "CORE", txt: "2-Phase Commit (2PC) vs Saga Pattern."},
+                    {tag: "CODE", txt: "Write pseudo-code for a Check-then-Act race condition."}
+                ]
+            },
+            {
+                w: "W6", focus: "Communication Protocols",
+                res: [
+                    {t: "gRPC Documentation", u: "https://grpc.io/docs/what-is-grpc/introduction/"},
+                    {t: "GraphQL vs REST", u: "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "REST (JSON) vs gRPC (Protobuf) performance."},
+                    {tag: "CORE", txt: "WebSockets vs Server-Sent Events (SSE)."},
+                    {tag: "CODE", txt: "Define a .proto file and generate Go/Python code."},
+                    {tag: "CORE", txt: "Idempotency: Implementing with Idempotency Keys."}
+                ]
+            },
+            {
+                w: "W7", focus: "Async & Queues",
+                res: [
+                    {t: "Kafka Introduction", u: LINKS.kafka},
+                    {t: "RabbitMQ Concepts", u: "https://www.rabbitmq.com/tutorials/amqp-concepts.html"}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "Kafka (Log) vs RabbitMQ (Queue). Smart vs Dumb broker."},
+                    {tag: "CORE", txt: "Kafka Ordering Guarantees (Topic Partitions)."},
+                    {tag: "CORE", txt: "Backpressure: Handling overwhelmed consumers."},
+                    {tag: "CORE", txt: "At-Most-Once vs At-Least-Once vs Exactly-Once."}
+                ]
+            },
+            {
+                w: "W8", focus: "Phase 1 Review",
+                res: [{t: "System Design Primer", u: gh}],
+                tasks: [
+                    {tag: "TEST", txt: "Design URL Shortener DB Schema + Capacity Plan."},
+                    {tag: "TEST", txt: "Explain HTTPS Handshake step-by-step."},
+                    {tag: "ADMIN", txt: "Verify W1-W7 tasks are green."}
+                ]
+            }
         ],
         phase2: [
-            { w: "W9", focus: "Consistent Hashing", res: [{t:"Dynamo Paper", u:google("Amazon Dynamo Paper")}], tasks: ["Implement Consistent Hashing ring", "Explain Virtual Nodes", "Summarize Vector Clocks"] },
-            { w: "W10", focus: "ID Gen & Rate Limiters", res: [{t:"Stripe Blog", u:google("Stripe Rate Limiter")}], tasks: ["UUID vs Snowflake", "Design Redis Rate Limiter", "Token Bucket vs Leaky Bucket"] },
-            { w: "W11", focus: "Crawlers & Search", res: [{t:"GH: Crawler", u:ghRepo+"#design-a-web-crawler"}], tasks: ["Explain Politeness", "Design Trie for Autocomplete", "Bloom Filters explanation"] },
-            { w: "W12", focus: "Dist. Caching", res: [{t:"Memcache Paper", u:google("Facebook Memcached Paper")}], tasks: ["Thundering Herd problem", "Hot Key solution", "Cache Aside vs Write Through"] },
-            { w: "W13", focus: "Dist. File Systems", res: [{t:"GFS Paper", u:google("GFS Paper")}], tasks: ["Read vs Write flow in GFS", "Block vs Object Storage", "HDFS small file problem"] },
-            { w: "W14", focus: "Chat Systems", res: [{t:"GH: Chat", u:ghRepo+"#design-a-chat-application"}], tasks: ["Schema: 1v1 vs Group", "User Typing feature", "Offline delivery handling"] },
-            { w: "W15", focus: "Consensus", res: [{t:"ZooKeeper", u:google("Apache ZooKeeper")}], tasks: ["Split Brain scenario", "Why Leader Election?", "Paxos/Raft high level"] },
-            { w: "W16", focus: "Review", res: [{t:"Latency #s", u:google("Latency numbers per year")}], tasks: ["Design Rate Limiter + ID Gen + Cache", "Review Latency Numbers", "Clear W9-W15 tasks"] }
+            {
+                w: "W9", focus: "KV Stores & Dynamo",
+                res: [{t: "Dynamo Paper (Amazon)", u: LINKS.dynamo}],
+                tasks: [
+                    {tag: "CORE", txt: "Read Dynamo Paper: Gossip, Hinted Handoff, Sloppy Quorum."},
+                    {tag: "MATH", txt: "Calc data loss prob (Replication Factor=3)."},
+                    {tag: "CORE", txt: "Vector Clocks: Merging divergent histories."},
+                    {tag: "CODE", txt: "Implement Consistent Hashing with Virtual Nodes."}
+                ]
+            },
+            {
+                w: "W10", focus: "ID Gen & Rate Limiting",
+                res: [{t: "Twitter Snowflake", u: LINKS.snowflake}],
+                tasks: [
+                    {tag: "CORE", txt: "UUID vs Auto-Increment vs Snowflake (Sortable)."},
+                    {tag: "CORE", txt: "Sharded Counters (Write contention solution)."},
+                    {tag: "CODE", txt: "Design Redis Rate Limiter (Lua Script)."},
+                    {tag: "CORE", txt: "Token Bucket vs Leaky Bucket algorithms."}
+                ]
+            },
+            {
+                w: "W11", focus: "Search & Crawling",
+                res: [{t: "Web Crawler Design", u: `${gh}#design-a-web-crawler`}],
+                tasks: [
+                    {tag: "CORE", txt: "Inverted Index: Tokenization & Stop Words."},
+                    {tag: "CORE", txt: "Crawler: URL Frontier & Politeness."},
+                    {tag: "CORE", txt: "SimHash / Fingerprinting for deduplication."},
+                    {tag: "CODE", txt: "Design Trie for Autocomplete (Typeahead)."}
+                ]
+            },
+            {
+                w: "W12", focus: "Distributed Caching",
+                res: [{t: "Scaling Memcache", u: LINKS.memcached}],
+                tasks: [
+                    {tag: "CORE", txt: "Leases: Solving Stale Sets (Memcache paper)."},
+                    {tag: "CORE", txt: "Celebrity/Hot Key problem solutions."},
+                    {tag: "CORE", txt: "Cache Penetration (Bloom Filters) & Avalanche."}
+                ]
+            },
+            {
+                w: "W13", focus: "Distributed File Systems",
+                res: [
+                    {t: "GFS Paper", u: LINKS.gfs},
+                    {t: "S3 Architecture", u: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "GFS: Master (Metadata) vs Chunkserver (Data)."},
+                    {tag: "CORE", txt: "Write Flow: Client -> Master -> Primary -> Secondaries."},
+                    {tag: "CORE", txt: "Block Storage vs File (NFS) vs Object (S3)."},
+                    {tag: "CORE", txt: "Erasure Coding vs Replication."}
+                ]
+            },
+            {
+                w: "W14", focus: "Chat Systems",
+                res: [{t: "Discord: Trillions of Messages", u: LINKS.discord}],
+                tasks: [
+                    {tag: "CORE", txt: "WebSocket vs XMPP vs MQTT."},
+                    {tag: "CORE", txt: "User Presence (Heartbeat + Redis TTL)."},
+                    {tag: "CORE", txt: "Discord's migration: MongoDB -> Cassandra -> ScyllaDB."},
+                    {tag: "CORE", txt: "Fan-out: Group Chat scaling."}
+                ]
+            },
+            {
+                w: "W15", focus: "Consensus (Raft/Paxos)",
+                res: [
+                    {t: "Raft Visualization", u: "https://thesecretlivesofdata.com/raft/"},
+                    {t: "Raft Paper/Site", u: LINKS.raft}
+                ],
+                tasks: [
+                    {tag: "CORE", txt: "Leader Election & Log Replication."},
+                    {tag: "CORE", txt: "Split Brain & Fencing Tokens."},
+                    {tag: "CORE", txt: "ZooKeeper Use Cases (Config, Locking)."},
+                    {tag: "CODE", txt: "Distributed Lock with Redis (Redlock)."}
+                ]
+            },
+            {
+                w: "W16", focus: "Phase 2 Review",
+                res: [{t: "Review Phase 2", u: "#"}],
+                tasks: [
+                    {tag: "TEST", txt: "Draw Rate Limiter Architecture."},
+                    {tag: "TEST", txt: "Draw Typeahead System Architecture."},
+                    {tag: "ADMIN", txt: "Verify W9-W15 tasks are green."}
+                ]
+            }
         ],
         phase3: [
-            { w: "W17", focus: "Twitter", res: [{t:"GH: Twitter", u:ghRepo+"#design-a-timeline"}], tasks: ["Fan-out Write vs Read", "Schema: User/Tweet/Follow", "Storage calc for 500M tweets"] },
-            { w: "W18", focus: "Netflix", res: [{t:"Netflix Blog", u:google("Netflix Tech Blog")}], tasks: ["Upload path architecture", "Viral traffic spikes", "Adaptive Bitrate Streaming"] },
-            { w: "W19", focus: "WhatsApp", res: [{t:"GH: WhatsApp", u:ghRepo+"#design-a-chat-application"}], tasks: ["Last Seen mechanism", "Multi-device sync", "Message history storage"] },
-            { w: "W20", focus: "Uber", res: [{t:"Uber Blog", u:google("Uber Tech Blog")}], tasks: ["Rider/Driver matching", "Surge Pricing concurrency", "Geospatial indexing (Quadtree)"] },
-            { w: "W21", focus: "Amazon", res: [{t:"Idempotency", u:google("Idempotency in API")}], tasks: ["Checkout Inventory Lock", "Handle payment failure", "Exactly Once processing"] },
-            { w: "W22", focus: "Mock (Peer)", res: [{t:"Pramp", u:"https://www.pramp.com"}], tasks: ["3 Peer Mocks", "Focus: Timing", "Communication feedback"] },
-            { w: "W23", focus: "Mock (Hard)", res: [{t:"Constraints", u:"#"}], tasks: ["3 Mocks with constraints", "Design Enterprise Twitter", "Focus: Requirements"] },
-            { w: "W24", focus: "Final", res: [{t:"Resume", u:"#"}], tasks: ["Prepare War Stories", "Memorize Latency #s", "Rest"] }
+            {
+                w: "W17", focus: "Design Twitter/NewsFeed",
+                res: [{t: "FB Feed Architecture", u: LINKS.fb_feed}],
+                tasks: [
+                    {tag: "CORE", txt: "Fan-out on Write (Push) vs Read (Pull)."},
+                    {tag: "MATH", txt: "Capacity Planning: Storage for 500M DAU."},
+                    {tag: "CORE", txt: "Graph DB (Followers) vs SQL Join."},
+                    {tag: "CORE", txt: "Pagination: Cursor vs Offset."}
+                ]
+            },
+            {
+                w: "W18", focus: "Design Netflix/YouTube",
+                res: [{t: "Netflix Tech Blog", u: LINKS.netflix}],
+                tasks: [
+                    {tag: "CORE", txt: "Upload Pipeline: Chunking -> Transcoding -> CDN."},
+                    {tag: "CORE", txt: "Adaptive Bitrate Streaming (DASH/HLS)."},
+                    {tag: "CORE", txt: "Content Delivery: Edge Locations (Open Connect)."}
+                ]
+            },
+            {
+                w: "W19", focus: "Design WhatsApp",
+                res: [{t: "E2E Encryption (Signal)", u: "https://signal.org/docs/"}],
+                tasks: [
+                    {tag: "CORE", txt: "E2E: Public/Private Keys & Session Keys."},
+                    {tag: "CORE", txt: "Multi-Device Sync (Offline devices)."},
+                    {tag: "CORE", txt: "Media Uploads (Encrypted Blob + Pointer)."}
+                ]
+            },
+            {
+                w: "W20", focus: "Design Uber",
+                res: [{t: "Uber Engineering Blog", u: LINKS.uber}],
+                tasks: [
+                    {tag: "CORE", txt: "Geospatial: Quadtree vs Geohash vs S2."},
+                    {tag: "CORE", txt: "Driver Location: High frequency write handling."},
+                    {tag: "CORE", txt: "Matching Service (Radius search)."}
+                ]
+            },
+            {
+                w: "W21", focus: "Design Amazon/Checkout",
+                res: [{t: "Distributed Tx", u: google("Distributed Transaction Patterns")}],
+                tasks: [
+                    {tag: "CORE", txt: "Inventory: Optimistic vs Pessimistic Locking."},
+                    {tag: "CORE", txt: "Idempotency Keys in Payment Processing."},
+                    {tag: "CORE", txt: "Shopping Cart Persistence (Redis/Dynamo)."}
+                ]
+            },
+            {
+                w: "W22", focus: "Mock Interviews (Peer)",
+                res: [{t: "Pramp", u: "https://www.pramp.com"}],
+                tasks: [
+                    {tag: "ACT", txt: "3 Peer Mocks. Focus: Requirements Gathering."},
+                    {tag: "ACT", txt: "Focus: High Level Design (Buy-in)."},
+                    {tag: "ACT", txt: "Focus: Deep Dive (One complex component)."}
+                ]
+            },
+            {
+                w: "W23", focus: "Mock Interviews (Expert)",
+                res: [{t: "Exponent Channel", u: "https://www.youtube.com/@ExponentTV"}],
+                tasks: [
+                    {tag: "ACT", txt: "Mock 1: Constraint (Low Bandwidth)."},
+                    {tag: "ACT", txt: "Mock 2: Constraint (High Security)."},
+                    {tag: "ACT", txt: "Mock 3: Constraint (Scale 100x)."}
+                ]
+            },
+            {
+                w: "W24", focus: "Final Prep",
+                res: [{t: "Resume", u: "#"}],
+                tasks: [
+                    {tag: "ACT", txt: "Prepare 2 'War Stories' (STAR Method)."},
+                    {tag: "ACT", txt: "Rest 24h before interview."},
+                    {tag: "ADMIN", txt: "All Systems Green."}
+                ]
+            }
         ]
     };
 
-    // --- GIST SYNC LOGIC ---
+    // --- LOGIC ---
+    let appState = {};
+    let GIST_ID = localStorage.getItem('sd_gist_id') || '';
+    let GH_TOKEN = localStorage.getItem('sd_gh_token') || '';
 
     async function loadFromGist() {
-        const statusEl = document.getElementById('syncStatus');
+        updateSyncUI(false);
         if (!GIST_ID || !GH_TOKEN) {
-            statusEl.innerText = "⚠️ Local Mode (Settings to Sync)";
-            // Load local backup if exists
             const local = localStorage.getItem('sd_local_backup');
             if(local) appState = JSON.parse(local);
             renderAll();
             return;
         }
 
-        statusEl.innerText = "🔄 Syncing...";
-        
         try {
+            updateSyncUI("loading");
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                headers: { 
-                    'Authorization': `token ${GH_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
+                headers: { 'Authorization': `token ${GH_TOKEN}` }
             });
-
             if (!res.ok) throw new Error("Auth Failed");
-            
             const gist = await res.json();
-            const file = gist.files['progress.json'];
-            
+            const file = gist.files['progress_v3.json']; 
             if (file) {
                 appState = JSON.parse(file.content);
-                statusEl.innerText = "✅ Synced";
-                statusEl.style.background = "rgba(22, 101, 52, 0.2)";
+                updateSyncUI(true);
             } else {
-                // First time initialization
                 appState = {};
-                statusEl.innerText = "✅ Connected (New Gist)";
+                updateSyncUI("new");
             }
             renderAll();
             localStorage.setItem('sd_local_backup', JSON.stringify(appState));
         } catch (e) {
             console.error(e);
-            statusEl.innerText = "❌ Sync Error (Check Token)";
-            statusEl.style.background = "rgba(239, 68, 68, 0.2)";
+            updateSyncUI("error");
         }
     }
 
     async function saveToGist() {
-        // Optimistic UI update first
         renderAll();
         localStorage.setItem('sd_local_backup', JSON.stringify(appState));
-
         if (!GIST_ID || !GH_TOKEN) return;
 
-        const statusEl = document.getElementById('syncStatus');
-        statusEl.innerText = "☁️ Saving...";
-
+        updateSyncUI("saving");
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
-                headers: { 
-                    'Authorization': `token ${GH_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                },
-                body: JSON.stringify({
-                    files: {
-                        "progress.json": { content: JSON.stringify(appState) }
-                    }
-                })
+                headers: { 'Authorization': `token ${GH_TOKEN}` },
+                body: JSON.stringify({ files: { "progress_v3.json": { content: JSON.stringify(appState) } } })
             });
-            statusEl.innerText = "✅ Saved";
+            updateSyncUI(true);
         } catch (e) {
-            statusEl.innerText = "❌ Save Failed";
+            updateSyncUI("error");
         }
     }
 
-    // --- UI LOGIC ---
-
     function renderAll() {
         ['phase1', 'phase2', 'phase3'].forEach(p => renderPhase(p, data[p]));
-        updateGlobalProgress();
+        updateGlobalStats();
     }
 
     function renderPhase(phaseId, weekData) {
         const tbody = document.getElementById(phaseId + '-body');
-        tbody.innerHTML = ''; // Clear
-
-        // Header Row
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<th>WK</th><th>FOCUS</th><th>RESOURCES</th><th>TASKS</th><th style="text-align:center">STATUS</th>`;
-        tbody.appendChild(headerRow);
+        tbody.innerHTML = '';
 
         weekData.forEach((week, wIndex) => {
             const tr = document.createElement('tr');
             
-            let tasksHtml = `<ul class="task-list">`;
+            let tasksHtml = `<div class="task-container">`;
             let completedCount = 0;
 
-            week.tasks.forEach((task, tIndex) => {
+            week.tasks.forEach((taskObj, tIndex) => {
                 const taskId = `${phaseId}-w${wIndex}-t${tIndex}`;
                 const isChecked = appState[taskId] === true;
                 if(isChecked) completedCount++;
 
-                tasksHtml += `
-                    <li class="task-item">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
-                            onchange="toggleTask('${taskId}')">
-                        <span>${task}</span>
-                    </li>`;
-            });
-            tasksHtml += `</ul>`;
+                let tagClass = "tag-core";
+                if(taskObj.tag === "CODE") tagClass = "tag-code";
+                if(taskObj.tag === "MATH") tagClass = "tag-math";
+                if(taskObj.tag === "ACT") tagClass = "tag-act";
 
-            const resHtml = week.res.map(r => `<a href="${r.u}" target="_blank" class="resource-link">${r.t}</a>`).join(' ');
-            
-            const isDone = completedCount === week.tasks.length && week.tasks.length > 0;
+                tasksHtml += `
+                    <div class="task-item">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTask('${taskId}')">
+                        <div>
+                            <span class="tag ${tagClass}">${taskObj.tag}</span>
+                            <span style="${isChecked ? 'text-decoration:line-through; opacity:0.6' : ''}">${taskObj.txt}</span>
+                        </div>
+                    </div>`;
+            });
+            tasksHtml += `</div>`;
+
+            const resHtml = week.res.map(r => `<a href="${r.u}" target="_blank" class="resource-link">📄 ${r.t}</a>`).join('');
+            const isDone = completedCount === week.tasks.length;
             if(isDone) tr.classList.add('done-row');
 
             tr.innerHTML = `
-                <td>${week.w}</td>
-                <td style="font-weight:600">${week.focus}</td>
+                <td style="font-weight:700;">${week.w}</td>
+                <td><div style="font-weight:600; color:#334155">${week.focus}</div></td>
                 <td>${resHtml}</td>
                 <td>${tasksHtml}</td>
-                <td style="text-align:center">
-                    <span class="status-badge ${isDone ? 'complete' : ''}">
-                        ${isDone ? 'DONE' : `${completedCount}/${week.tasks.length}`}
-                    </span>
-                </td>
             `;
             tbody.appendChild(tr);
         });
@@ -371,7 +573,7 @@
         saveToGist();
     }
 
-    function updateGlobalProgress() {
+    function updateGlobalStats() {
         let total = 0, done = 0;
         ['phase1', 'phase2', 'phase3'].forEach(p => {
             data[p].forEach((week, wIndex) => {
@@ -383,19 +585,26 @@
         });
         const pct = total === 0 ? 0 : Math.round((done / total) * 100);
         document.getElementById('globalProgress').style.width = pct + '%';
-        document.getElementById('globalProgressText').innerText = pct + '%';
+        document.getElementById('globalStats').innerText = `${pct}%`;
     }
 
-    // --- SETTINGS ---
-    function toggleModal() {
-        const m = document.getElementById('configModal');
-        m.classList.toggle('active');
-        if(m.classList.contains('active')) {
+    function updateSyncUI(status) {
+        const el = document.getElementById('syncStatus');
+        if(status === "loading") el.innerText = "🔄 Syncing...";
+        else if(status === "saving") el.innerText = "☁️ Saving...";
+        else if(status === "new") { el.innerText = "✅ New Gist"; el.style.color="#4ade80"; }
+        else if(status === "error") { el.innerText = "❌ Error"; el.style.color="#f87171"; }
+        else if(status === true) { el.innerText = "✅ Synced"; el.style.color="#4ade80"; }
+        else { el.innerText = "⚪ Local"; el.style.color="white"; }
+    }
+
+    function toggleModal() { 
+        document.getElementById('configModal').classList.toggle('active');
+        if(document.getElementById('configModal').classList.contains('active')) {
             document.getElementById('gistIdInput').value = GIST_ID;
             document.getElementById('tokenInput').value = GH_TOKEN;
         }
     }
-
     function saveConfig() {
         GIST_ID = document.getElementById('gistIdInput').value.trim();
         GH_TOKEN = document.getElementById('tokenInput').value.trim();
@@ -404,21 +613,17 @@
         toggleModal();
         loadFromGist();
     }
-
     function openTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(tabName).classList.add('active');
-        // Simple active button logic
         const btns = document.querySelectorAll('.tab-btn');
         if(tabName.includes('1')) btns[0].classList.add('active');
         if(tabName.includes('2')) btns[1].classList.add('active');
         if(tabName.includes('3')) btns[2].classList.add('active');
     }
 
-    // Init
     loadFromGist();
-
 </script>
 </body>
 </html>
