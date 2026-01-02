@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANGA System Design</title>
+    <title>MANGA System Design PRO</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -158,19 +158,22 @@
     <div class="modal-content">
         <span class="close-modal-x" onclick="toggleModal()" title="Close">&times;</span>
         <h2 style="margin-top:0">Sync Configuration</h2>
-        <div class="input-group">
-            <label>Gist ID</label>
-            <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2a..." />
-        </div>
-        <div class="input-group">
-            <label>GitHub Token (Scope: gist)</label>
-            <input type="password" id="tokenInput" placeholder="ghp_..." />
-        </div>
         
-        <div class="modal-actions">
-            <button class="btn-primary" onclick="saveConfig()">Save & Sync</button>
-            <button class="btn-secondary" onclick="toggleModal()">Close</button>
-        </div>
+        <form onsubmit="saveConfig(event)">
+            <div class="input-group">
+                <label>Gist ID</label>
+                <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2a..." autocomplete="username" />
+            </div>
+            <div class="input-group">
+                <label>GitHub Token (Scope: gist)</label>
+                <input type="password" id="tokenInput" placeholder="ghp_..." autocomplete="current-password" />
+            </div>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Save & Sync</button>
+                <button type="button" class="btn-secondary" onclick="toggleModal()">Close</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -327,7 +330,7 @@
     let GIST_ID = localStorage.getItem('sd_gist_id') || '';
     let GH_TOKEN = localStorage.getItem('sd_gh_token') || '';
 
-    // MODIFIED: Add timestamp to bypass cache
+    // FIX: Removed cache-control header, relying on timestamp for cache busting
     async function loadFromGist() {
         updateSyncUI(false);
         if (!GIST_ID || !GH_TOKEN) {
@@ -339,11 +342,10 @@
 
         try {
             updateSyncUI("loading");
-            // CACHE BUSTER ADDED HERE
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${new Date().getTime()}`, {
                 headers: { 
                     'Authorization': `token ${GH_TOKEN}`,
-                    'Cache-Control': 'no-cache'
+                    // 'Cache-Control': 'no-cache'  <-- REMOVED TO FIX CORS
                 }
             });
             if (!res.ok) throw new Error("Auth Failed");
@@ -469,14 +471,20 @@
             document.getElementById('tokenInput').value = GH_TOKEN;
         }
     }
-    function saveConfig() {
+    
+    // UPDATED: Handle Form Submit for DOM compliance
+    function saveConfig(event) {
+        if(event) event.preventDefault();
+        
         GIST_ID = document.getElementById('gistIdInput').value.trim();
         GH_TOKEN = document.getElementById('tokenInput').value.trim();
         localStorage.setItem('sd_gist_id', GIST_ID);
         localStorage.setItem('sd_gh_token', GH_TOKEN);
+        
         toggleModal();
         loadFromGist();
     }
+    
     function openTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
