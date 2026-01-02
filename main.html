@@ -1,147 +1,595 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANGA System Design PRO</title>
+    <title>System Design Preparation</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
+        /* --- COLOR PALETTE (VIBRANT) --- */
         :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
+            /* LIGHT THEME */
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg: #f3f4f6;
             --surface: #ffffff;
-            --text: #1e293b;
-            --border: #cbd5e1;
-            --link: #0369a1;
-            --tag-code: #f3e8ff; --tag-code-text: #6b21a8;
-            --tag-math: #fff7ed; --tag-math-text: #c2410c;
-            --tag-act: #fee2e2; --tag-act-text: #991b1b;
+            --surface-alt: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* Tags */
+            --tag-core-bg: #dbeafe;
+            --tag-core-text: #1e40af;
+            --tag-code-bg: #f3e8ff;
+            --tag-code-text: #6b21a8;
+            --tag-math-bg: #ffedd5;
+            --tag-math-text: #9a3412;
+            --tag-act-bg: #fee2e2;
+            --tag-act-text: #991b1b;
+            --tag-admin-bg: #dcfce7;
+            --tag-admin-text: #166534;
+            --tag-test-bg: #fef3c7;
+            --tag-test-text: #92400e;
+
+            /* Progress Bar */
+            --prog-track: #e2e8f0;
+            --prog-border: #cbd5e1;
+            --prog-fill-start: #3b82f6;
+            --prog-fill-end: #2563eb;
+            
+            /* Status Dots */
+            --dot-offline: #94a3b8;
+        }
+
+        /* DARK THEME */
+        [data-theme="dark"] {
+            --primary: #60a5fa;
+            --primary-hover: #93c5fd;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-alt: #334155;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+
+            /* Tags (Dark Mode) */
+            --tag-core-bg: #172554;
+            --tag-core-text: #bfdbfe;
+            --tag-code-bg: #2e1065;
+            --tag-code-text: #e9d5ff;
+            --tag-math-bg: #431407;
+            --tag-math-text: #fdba74;
+            --tag-act-bg: #450a0a;
+            --tag-act-text: #fca5a5;
+            --tag-admin-bg: #052e16;
+            --tag-admin-text: #86efac;
+            --tag-test-bg: #451a03;
+            --tag-test-text: #fcd34d;
+
+            /* Progress Bar */
+            --prog-track: #020617;
+            --prog-border: #475569;
+            --prog-fill-start: #3b82f6;
+            --prog-fill-end: #60a5fa;
+
+            /* Status Dots */
+            --dot-offline: #475569;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            line-height: 1.5;
+            padding: 40px 20px;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1250px;
             margin: 0 auto;
             background: var(--surface);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             border: 1px solid var(--border);
         }
 
+        /* HEADER */
         header {
-            background: #0f172a;
-            color: white;
-            padding: 2rem;
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--border);
         }
 
-        h1 { margin: 0; font-size: 1.5rem; }
-        
-        .btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-        }
-        .btn:hover { background: rgba(255,255,255,0.2); }
-
-        .progress-bar-container { background: #e2e8f0; height: 8px; width: 100%; }
-        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
-
-        .tabs { display: flex; border-bottom: 1px solid var(--border); background: #f1f5f9; }
-        .tab-btn { padding: 1rem 2rem; border: none; background: none; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; }
-        .tab-btn.active { background: white; color: var(--primary); border-bottom-color: var(--primary); }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
-        th { background: #f8fafc; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; position: sticky; top: 0; }
-
-        tr.done-row { background-color: #f0fdf4; }
-        
-        .task-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; padding: 4px 0; }
-        input[type="checkbox"] { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
-
-        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-right: 6px; text-transform: uppercase; }
-        .tag-code { background: var(--tag-code); color: var(--tag-code-text); }
-        .tag-math { background: var(--tag-math); color: var(--tag-math-text); }
-        .tag-core { background: #e0f2fe; color: #0369a1; }
-        .tag-act { background: var(--tag-act); color: var(--tag-act-text); }
-
-        .resource-link { display: block; margin-bottom: 6px; color: var(--link); text-decoration: none; font-size: 0.85rem; font-weight: 500; }
-        .resource-link:hover { text-decoration: underline; }
-
-        /* Modal Styles */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 1000; 
-        }
-        .modal.active { display: flex; }
-        .modal-content { 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 12px; 
-            width: 400px; 
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
-            position: relative; 
-        }
-        
-        .close-modal-x {
-            position: absolute;
-            top: 15px;
-            right: 20px;
+        h1 {
+            margin: 0;
             font-size: 1.5rem;
-            color: #64748b;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            background: var(--dot-offline);
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b98166;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            background: var(--surface-alt);
+            border-color: var(--text-muted);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border: 1px solid var(--primary);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: white;
+        }
+
+        .btn-icon {
+            padding: 8px 10px;
+            font-size: 1.1rem;
             line-height: 1;
         }
-        .close-modal-x:hover { color: #1e293b; }
 
-        .input-group { margin-bottom: 1rem; }
-        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-        .input-group input { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        /* DASHBOARD */
+        .dashboard {
+            padding: 2rem;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-label-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .big-progress-track {
+            height: 20px;
+            background: var(--prog-track);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--prog-border);
+        }
+
+        .big-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--prog-fill-start) 0%, var(--prog-fill-end) 100%);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
         
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }
-        .btn-secondary { background: #94a3b8; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary:hover { opacity: 0.9; }
+        /* Shimmer Effect */
+        .big-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
 
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            background: var(--surface);
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 1.25rem 0;
+            margin-right: 2rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* TABLE */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 1rem 2rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        td {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Done Row */
+        tr.done-row {
+            background-color: var(--surface-alt);
+        }
+
+        tr.done-row td {
+            opacity: 0.7;
+        }
+
+        /* Tasks */
+        .task-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .task-item:hover {
+            opacity: 0.8;
+        }
+
+        input[type="checkbox"] {
+            margin-top: 5px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+            background-color: var(--bg);
+        }
+
+        /* Tags */
+        .tag {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-right: 8px;
+            letter-spacing: 0.02em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .tag-core {
+            background: var(--tag-core-bg);
+            color: var(--tag-core-text);
+        }
+
+        .tag-code {
+            background: var(--tag-code-bg);
+            color: var(--tag-code-text);
+        }
+
+        .tag-math {
+            background: var(--tag-math-bg);
+            color: var(--tag-math-text);
+        }
+
+        .tag-act {
+            background: var(--tag-act-bg);
+            color: var(--tag-act-text);
+        }
+
+        .tag-admin {
+            background: var(--tag-admin-bg);
+            color: var(--tag-admin-text);
+        }
+
+        .tag-test {
+            background: var(--tag-test-bg);
+            color: var(--tag-test-text);
+        }
+
+        /* Links */
+        .resource-link {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .resource-link:hover {
+            text-decoration: underline;
+            color: var(--primary-hover);
+        }
+
+        .week-cell {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* Solution Button Styles */
+        .btn-solution {
+            margin-top: 15px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border: 1px dashed var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-solution:hover {
+            background: var(--primary);
+            color: white;
+            border-style: solid;
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 450px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-modal-x {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .close-modal-x:hover {
+            color: var(--text-main);
+        }
+        
+        /* Vault Modal */
+        .sol-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sol-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .sol-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-add:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        .input-group input:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <div style="display:flex; align-items:center; gap:15px;">
-            <h1>MANGA System Design <span style="color:#60a5fa">PRO</span></h1>
-            <span id="globalStats" style="font-size:0.9rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px;">0%</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center;">
-            <span id="syncStatus" style="font-size:0.8rem; opacity:0.8;">⚪ Local</span>
-            <button class="btn" onclick="loadFromGist()">🔄 Sync Now</button>
-            <button class="btn" onclick="toggleModal()">⚙️ Settings</button>
+        <h1>System Design Preparation</h1>
+        
+        <div class="header-actions">
+            <div>
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">Local</span>
+            </div>
+            <button class="btn btn-icon" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+            <button class="btn" onclick="loadFromGist()">🔄 Sync</button>
+            <button class="btn btn-primary" onclick="toggleModal('configModal')">⚙️ Settings</button>
         </div>
     </header>
-    
-    <div class="progress-bar-container"><div class="progress-bar-fill" id="globalProgress"></div></div>
+
+    <div class="dashboard">
+        <div class="progress-label-row">
+            <span>Overall Completion</span>
+            <span id="globalStats">0%</span>
+        </div>
+        <div class="big-progress-track">
+            <div class="big-progress-fill" id="globalProgress"></div>
+        </div>
+    </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab('phase1')">Phase 1: Fundamentals</button>
@@ -149,35 +597,148 @@
         <button class="tab-btn" onclick="openTab('phase3')">Phase 3: Architecture</button>
     </div>
 
-    <div id="phase1" class="tab-content active"><table><tbody id="phase1-body"></tbody></table></div>
-    <div id="phase2" class="tab-content"><table><tbody id="phase2-body"></tbody></table></div>
-    <div id="phase3" class="tab-content"><table><tbody id="phase3-body"></tbody></table></div>
+    <div id="phase1" class="tab-content active">
+        <table>
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Focus</th>
+                    <th>Resources</th>
+                    <th>Tasks</th>
+                </tr>
+            </thead>
+            <tbody id="phase1-body"></tbody>
+        </table>
+    </div>
+    
+    <div id="phase2" class="tab-content">
+        <table>
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Focus</th>
+                    <th>Resources</th>
+                    <th>Tasks</th>
+                </tr>
+            </thead>
+            <tbody id="phase2-body"></tbody>
+        </table>
+    </div>
+    
+    <div id="phase3" class="tab-content">
+        <table>
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Focus</th>
+                    <th>Resources</th>
+                    <th>Tasks</th>
+                </tr>
+            </thead>
+            <tbody id="phase3-body"></tbody>
+        </table>
+    </div>
 </div>
 
+<!-- Solution Vault Modal -->
+<div id="vaultModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal-x" onclick="closeVault()">&times;</span>
+        <h3 id="vaultTitle" style="margin-top: 0; margin-bottom: 20px; color: var(--text-main);">Solution Vault</h3>
+        <div id="vaultViewMode">
+            <div id="vaultLinksList"></div>
+            <button class="btn-add" onclick="switchVaultMode('edit')">+ Add New Solution</button>
+        </div>
+        <div id="vaultEditMode" style="display:none;">
+            <div class="input-group">
+                <label>Solution Name</label>
+                <input type="text" id="newSolName" placeholder="e.g. My Redis Cluster Design">
+            </div>
+            <div class="input-group">
+                <label>URL (GitHub, Excalidraw, etc.)</label>
+                <input type="text" id="newSolUrl" placeholder="https://...">
+            </div>
+            <button class="btn btn-primary" onclick="addSolutionToVault()" style="width:100%; padding:12px;">Save Solution</button>
+            <button class="btn" onclick="switchVaultMode('view')" style="width:100%; margin-top:10px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
 <div id="configModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal-x" onclick="toggleModal()" title="Close">&times;</span>
-        <h2 style="margin-top:0">Sync Configuration</h2>
+        <span class="close-modal-x" onclick="toggleModal('configModal')">&times;</span>
+        <h2 style="margin-top:0; margin-bottom:20px; color:var(--text-main);">Sync Configuration</h2>
         
         <form onsubmit="saveConfig(event)">
             <div class="input-group">
                 <label>Gist ID</label>
-                <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2a..." autocomplete="username" />
+                <input type="text" id="gistIdInput" placeholder="e.g. 8f4b2a..." autocomplete="off">
             </div>
             <div class="input-group">
                 <label>GitHub Token (Scope: gist)</label>
-                <input type="password" id="tokenInput" placeholder="ghp_..." autocomplete="current-password" />
+                <input type="password" id="tokenInput" placeholder="ghp_..." autocomplete="current-password">
             </div>
             
-            <div class="modal-actions">
-                <button type="submit" class="btn-primary">Save & Sync</button>
-                <button type="button" class="btn-secondary" onclick="toggleModal()">Close</button>
-            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:12px;">Save & Sync</button>
         </form>
     </div>
 </div>
 
 <script>
+    // --- THEME LOGIC ---
+    const themeBtn = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('sd_theme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+        const current = htmlEl.getAttribute('data-theme');
+        const newTheme = current === 'light' ? 'dark' : 'light';
+        
+        htmlEl.setAttribute('data-theme', newTheme);
+        localStorage.setItem('sd_theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        themeBtn.innerText = theme === 'light' ? '🌙' : '☀️';
+    }
+
+    // --- MODAL LOGIC ---
+    function toggleModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.toggle('active');
+        if(modalId === 'configModal' && modal.classList.contains('active')) {
+            document.getElementById('gistIdInput').value = GIST_ID;
+            document.getElementById('tokenInput').value = GH_TOKEN;
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Close when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    });
+
+    // Close when pressing Esc
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
+
+    // --- DATA ---
     const gh = "https://github.com/donnemartin/system-design-primer";
     const google = (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
     
@@ -200,302 +761,481 @@
     const data = {
         phase1: [
             {
-                w: "W1", focus: "Scalability Basics",
+                w: "Week 1", focus: "Scalability Basics",
                 res: [{t: "DDIA Summary (Ch 1)", u: LINKS.ddia_sum}, {t: "Latency Numbers (Napkin Math)", u: LINKS.latency}, {t: "Performance vs Scalability", u: `${gh}#performance-vs-scalability`}],
                 tasks: [{tag: "CORE", txt: "Define Reliability, Scalability, Maintainability."}, {tag: "MATH", txt: "Memorize: 1ms = 10^6 ns. SSD read ~100µs. Round trip ~150ms."}, {tag: "CODE", txt: "Script: Measure local disk IOPS vs Memory access speed."}, {tag: "CORE", txt: "Vertical (Scale Up) vs Horizontal (Scale Out) trade-offs."}]
             },
             {
-                w: "W2", focus: "Load Balancing & Caching",
+                w: "Week 2", focus: "Load Balancing & Caching",
                 res: [{t: "Inside NGINX Architecture", u: LINKS.nginx}, {t: "Scaling Memcache (Facebook)", u: LINKS.memcached}, {t: "Caching Patterns", u: `${gh}#caching`}],
                 tasks: [{tag: "CODE", txt: "Config NGINX: Round Robin vs Least Connections."}, {tag: "CORE", txt: "L4 vs L7 Load Balancing. When to use which?"}, {tag: "CORE", txt: "Cache Patterns: Aside, Read-Through, Write-Back."}, {tag: "CORE", txt: "Thundering Herd Problem: Solution strategies."}]
             },
             {
-                w: "W3", focus: "Database Internals",
+                w: "Week 3", focus: "Database Internals",
                 res: [{t: "DDIA Summary (Ch 3)", u: LINKS.ddia_sum}, {t: "PostgreSQL Architecture", u: "https://www.postgresql.org/docs/current/overview.html"}],
                 tasks: [{tag: "CORE", txt: "B-Trees (SQL) vs LSM-Trees (NoSQL/Cassandra)."}, {tag: "CODE", txt: "Postgres: Use EXPLAIN ANALYZE to optimize a query."}, {tag: "CORE", txt: "ACID Isolation Levels: Read Committed vs Serializable."}, {tag: "CORE", txt: "Bloom Filters: How they prevent disk reads."}]
             },
             {
-                w: "W4", focus: "Replication & Sharding",
+                w: "Week 4", focus: "Replication & Sharding",
                 res: [{t: "DDIA Summary (Ch 5 & 6)", u: LINKS.ddia_sum}, {t: "Sharding", u: `${gh}#sharding`}],
                 tasks: [{tag: "CORE", txt: "Single Leader vs Multi-Leader vs Leaderless."}, {tag: "CORE", txt: "Replication Lag & Read-Your-Own-Writes consistency."}, {tag: "CODE", txt: "Design Consistent Hashing ring (Handle node add/remove)."}, {tag: "CORE", txt: "Key-Range vs Hash Partitioning trade-offs."}]
             },
             {
-                w: "W5", focus: "Consistency & CAP",
+                w: "Week 5", focus: "Consistency & CAP",
                 res: [{t: "CAP Theorem", u: `${gh}#cap-theorem`}, {t: "Strong vs Eventual Consistency", u: "https://www.werner-vogels.com/2008/12/eventually-consistent.html"}],
                 tasks: [{tag: "CORE", txt: "Why 'CA' is impossible in distributed systems."}, {tag: "CORE", txt: "PACELC Theorem: Latency vs Consistency."}, {tag: "CORE", txt: "2-Phase Commit (2PC) vs Saga Pattern."}, {tag: "CODE", txt: "Write pseudo-code for a Check-then-Act race condition."}]
             },
             {
-                w: "W6", focus: "Communication Protocols",
+                w: "Week 6", focus: "Communication Protocols",
                 res: [{t: "gRPC Documentation", u: "https://grpc.io/docs/what-is-grpc/introduction/"}, {t: "GraphQL vs REST", u: "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}],
                 tasks: [{tag: "CORE", txt: "REST (JSON) vs gRPC (Protobuf) performance."}, {tag: "CORE", txt: "WebSockets vs Server-Sent Events (SSE)."}, {tag: "CODE", txt: "Define a .proto file and generate Go/Python code."}, {tag: "CORE", txt: "Idempotency: Implementing with Idempotency Keys."}]
             },
             {
-                w: "W7", focus: "Async & Queues",
+                w: "Week 7", focus: "Async & Queues",
                 res: [{t: "Kafka Introduction", u: LINKS.kafka}, {t: "RabbitMQ Concepts", u: "https://www.rabbitmq.com/tutorials/amqp-concepts.html"}],
                 tasks: [{tag: "CORE", txt: "Kafka (Log) vs RabbitMQ (Queue). Smart vs Dumb broker."}, {tag: "CORE", txt: "Kafka Ordering Guarantees (Topic Partitions)."}, {tag: "CORE", txt: "Backpressure: Handling overwhelmed consumers."}, {tag: "CORE", txt: "At-Most-Once vs At-Least-Once vs Exactly-Once."}]
             },
             {
-                w: "W8", focus: "Phase 1 Review",
+                w: "Week 8", focus: "Phase 1 Review",
                 res: [{t: "System Design Primer", u: gh}],
                 tasks: [{tag: "TEST", txt: "Design URL Shortener DB Schema + Capacity Plan."}, {tag: "TEST", txt: "Explain HTTPS Handshake step-by-step."}, {tag: "ADMIN", txt: "Verify W1-W7 tasks are green."}]
             }
         ],
         phase2: [
             {
-                w: "W9", focus: "KV Stores & Dynamo",
+                w: "Week 9", focus: "KV Stores & Dynamo",
                 res: [{t: "Dynamo Paper (Amazon)", u: LINKS.dynamo}],
                 tasks: [{tag: "CORE", txt: "Read Dynamo Paper: Gossip, Hinted Handoff, Sloppy Quorum."}, {tag: "MATH", txt: "Calc data loss prob (Replication Factor=3)."}, {tag: "CORE", txt: "Vector Clocks: Merging divergent histories."}, {tag: "CODE", txt: "Implement Consistent Hashing with Virtual Nodes."}]
             },
             {
-                w: "W10", focus: "ID Gen & Rate Limiting",
+                w: "Week 10", focus: "ID Gen & Rate Limiting",
                 res: [{t: "Twitter Snowflake", u: LINKS.snowflake}],
                 tasks: [{tag: "CORE", txt: "UUID vs Auto-Increment vs Snowflake (Sortable)."}, {tag: "CORE", txt: "Sharded Counters (Write contention solution)."}, {tag: "CODE", txt: "Design Redis Rate Limiter (Lua Script)."}, {tag: "CORE", txt: "Token Bucket vs Leaky Bucket algorithms."}]
             },
             {
-                w: "W11", focus: "Search & Crawling",
+                w: "Week 11", focus: "Search & Crawling",
                 res: [{t: "Web Crawler Design", u: `${gh}#design-a-web-crawler`}],
                 tasks: [{tag: "CORE", txt: "Inverted Index: Tokenization & Stop Words."}, {tag: "CORE", txt: "Crawler: URL Frontier & Politeness."}, {tag: "CORE", txt: "SimHash / Fingerprinting for deduplication."}, {tag: "CODE", txt: "Design Trie for Autocomplete (Typeahead)."}]
             },
             {
-                w: "W12", focus: "Distributed Caching",
+                w: "Week 12", focus: "Distributed Caching",
                 res: [{t: "Scaling Memcache", u: LINKS.memcached}],
                 tasks: [{tag: "CORE", txt: "Leases: Solving Stale Sets (Memcache paper)."}, {tag: "CORE", txt: "Celebrity/Hot Key problem solutions."}, {tag: "CORE", txt: "Cache Penetration (Bloom Filters) & Avalanche."}]
             },
             {
-                w: "W13", focus: "Distributed File Systems",
+                w: "Week 13", focus: "Distributed File Systems",
                 res: [{t: "GFS Paper", u: LINKS.gfs}, {t: "S3 Architecture", u: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"}],
                 tasks: [{tag: "CORE", txt: "GFS: Master (Metadata) vs Chunkserver (Data)."}, {tag: "CORE", txt: "Write Flow: Client -> Master -> Primary -> Secondaries."}, {tag: "CORE", txt: "Block Storage vs File (NFS) vs Object (S3)."}, {tag: "CORE", txt: "Erasure Coding vs Replication."}]
             },
             {
-                w: "W14", focus: "Chat Systems",
+                w: "Week 14", focus: "Chat Systems",
                 res: [{t: "Discord: Trillions of Messages", u: LINKS.discord}],
                 tasks: [{tag: "CORE", txt: "WebSocket vs XMPP vs MQTT."}, {tag: "CORE", txt: "User Presence (Heartbeat + Redis TTL)."}, {tag: "CORE", txt: "Discord's migration: MongoDB -> Cassandra -> ScyllaDB."}, {tag: "CORE", txt: "Fan-out: Group Chat scaling."}]
             },
             {
-                w: "W15", focus: "Consensus (Raft/Paxos)",
+                w: "Week 15", focus: "Consensus (Raft/Paxos)",
                 res: [{t: "Raft Visualization", u: "https://thesecretlivesofdata.com/raft/"}, {t: "Raft Paper/Site", u: LINKS.raft}],
                 tasks: [{tag: "CORE", txt: "Leader Election & Log Replication."}, {tag: "CORE", txt: "Split Brain & Fencing Tokens."}, {tag: "CORE", txt: "ZooKeeper Use Cases (Config, Locking)."}, {tag: "CODE", txt: "Distributed Lock with Redis (Redlock)."}]
             },
             {
-                w: "W16", focus: "Phase 2 Review",
+                w: "Week 16", focus: "Phase 2 Review",
                 res: [{t: "Review Phase 2", u: "#"}],
                 tasks: [{tag: "TEST", txt: "Draw Rate Limiter Architecture."}, {tag: "TEST", txt: "Draw Typeahead System Architecture."}, {tag: "ADMIN", txt: "Verify W9-W15 tasks are green."}]
             }
         ],
         phase3: [
             {
-                w: "W17", focus: "Design Twitter/NewsFeed",
+                w: "Week 17", focus: "Design Twitter/NewsFeed",
                 res: [{t: "FB Feed Architecture", u: LINKS.fb_feed}],
                 tasks: [{tag: "CORE", txt: "Fan-out on Write (Push) vs Read (Pull)."}, {tag: "MATH", txt: "Capacity Planning: Storage for 500M DAU."}, {tag: "CORE", txt: "Graph DB (Followers) vs SQL Join."}, {tag: "CORE", txt: "Pagination: Cursor vs Offset."}]
             },
             {
-                w: "W18", focus: "Design Netflix/YouTube",
+                w: "Week 18", focus: "Design Netflix/YouTube",
                 res: [{t: "Netflix Tech Blog", u: LINKS.netflix}],
                 tasks: [{tag: "CORE", txt: "Upload Pipeline: Chunking -> Transcoding -> CDN."}, {tag: "CORE", txt: "Adaptive Bitrate Streaming (DASH/HLS)."}, {tag: "CORE", txt: "Content Delivery: Edge Locations (Open Connect)."}]
             },
             {
-                w: "W19", focus: "Design WhatsApp",
+                w: "Week 19", focus: "Design WhatsApp",
                 res: [{t: "E2E Encryption (Signal)", u: "https://signal.org/docs/"}],
                 tasks: [{tag: "CORE", txt: "E2E: Public/Private Keys & Session Keys."}, {tag: "CORE", txt: "Multi-Device Sync (Offline devices)."}, {tag: "CORE", txt: "Media Uploads (Encrypted Blob + Pointer)."}]
             },
             {
-                w: "W20", focus: "Design Uber",
+                w: "Week 20", focus: "Design Uber",
                 res: [{t: "Uber Engineering Blog", u: LINKS.uber}],
                 tasks: [{tag: "CORE", txt: "Geospatial: Quadtree vs Geohash vs S2."}, {tag: "CORE", txt: "Driver Location: High frequency write handling."}, {tag: "CORE", txt: "Matching Service (Radius search)."}]
             },
             {
-                w: "W21", focus: "Design Amazon/Checkout",
+                w: "Week 21", focus: "Design Amazon/Checkout",
                 res: [{t: "Distributed Tx", u: google("Distributed Transaction Patterns")}],
                 tasks: [{tag: "CORE", txt: "Inventory: Optimistic vs Pessimistic Locking."}, {tag: "CORE", txt: "Idempotency Keys in Payment Processing."}, {tag: "CORE", txt: "Shopping Cart Persistence (Redis/Dynamo)."}]
             },
             {
-                w: "W22", focus: "Mock Interviews (Peer)",
+                w: "Week 22", focus: "Mock Interviews (Peer)",
                 res: [{t: "Pramp", u: "https://www.pramp.com"}],
                 tasks: [{tag: "ACT", txt: "3 Peer Mocks. Focus: Requirements Gathering."}, {tag: "ACT", txt: "Focus: High Level Design (Buy-in)."}, {tag: "ACT", txt: "Focus: Deep Dive (One complex component)."}]
             },
             {
-                w: "W23", focus: "Mock Interviews (Expert)",
+                w: "Week 23", focus: "Mock Interviews (Expert)",
                 res: [{t: "Exponent Channel", u: "https://www.youtube.com/@ExponentTV"}],
                 tasks: [{tag: "ACT", txt: "Mock 1: Constraint (Low Bandwidth)."}, {tag: "ACT", txt: "Mock 2: Constraint (High Security)."}, {tag: "ACT", txt: "Mock 3: Constraint (Scale 100x)."}]
             },
             {
-                w: "W24", focus: "Final Prep",
+                w: "Week 24", focus: "Final Prep",
                 res: [{t: "Resume", u: "#"}],
                 tasks: [{tag: "ACT", txt: "Prepare 2 'War Stories' (STAR Method)."}, {tag: "ACT", txt: "Rest 24h before interview."}, {tag: "ADMIN", txt: "All Systems Green."}]
             }
         ]
     };
 
-    let appState = {};
+    let appState = { checks: {}, vault: {} };
+    let activeVaultKey = null;
     let GIST_ID = localStorage.getItem('sd_gist_id') || '';
     let GH_TOKEN = localStorage.getItem('sd_gh_token') || '';
 
-    // FIX: Removed cache-control header, relying on timestamp for cache busting
-    async function loadFromGist() {
-        updateSyncUI(false);
-        if (!GIST_ID || !GH_TOKEN) {
-            const local = localStorage.getItem('sd_local_backup');
-            if(local) appState = JSON.parse(local);
-            renderAll();
+    // --- VAULT LOGIC ---
+    function openVault(weekKey) {
+        activeVaultKey = weekKey;
+        document.getElementById('vaultTitle').innerText = "Solution Vault: " + weekKey;
+        renderVaultLinks();
+        document.getElementById('vaultModal').classList.add('active');
+        switchVaultMode('view');
+    }
+
+    function closeVault() {
+        document.getElementById('vaultModal').classList.remove('active');
+        switchVaultMode('view');
+    }
+
+    function switchVaultMode(mode) {
+        document.getElementById('vaultViewMode').style.display = mode === 'view' ? 'block' : 'none';
+        document.getElementById('vaultEditMode').style.display = mode === 'edit' ? 'block' : 'none';
+        if (mode === 'edit') {
+            document.getElementById('newSolName').value = '';
+            document.getElementById('newSolUrl').value = '';
+            document.getElementById('newSolName').focus();
+        }
+    }
+
+    function renderVaultLinks() {
+        const list = document.getElementById('vaultLinksList');
+        list.innerHTML = '';
+        const links = appState.vault[activeVaultKey] || [];
+        
+        if (links.length === 0) {
+            list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No solutions added yet.</p>';
             return;
         }
+        
+        links.forEach((link, idx) => {
+            const solItem = document.createElement('div');
+            solItem.className = 'sol-item';
+            solItem.innerHTML = `
+                <a href="${link.u}" target="_blank" class="sol-link">🔗 ${link.n}</a>
+                <span style="cursor:pointer; color:var(--text-muted); padding: 4px;" onclick="deleteSolution(${idx})" title="Delete">🗑️</span>
+            `;
+            list.appendChild(solItem);
+        });
+    }
 
-        try {
-            updateSyncUI("loading");
-            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${new Date().getTime()}`, {
-                headers: { 
-                    'Authorization': `token ${GH_TOKEN}`,
-                    // 'Cache-Control': 'no-cache'  <-- REMOVED TO FIX CORS
-                }
-            });
-            if (!res.ok) throw new Error("Auth Failed");
-            const gist = await res.json();
-            const file = gist.files['progress_v3.json']; 
-            if (file) {
-                appState = JSON.parse(file.content);
-                updateSyncUI(true);
-            } else {
-                appState = {};
-                updateSyncUI("new");
+    function addSolutionToVault() {
+        const name = document.getElementById('newSolName').value.trim();
+        const url = document.getElementById('newSolUrl').value.trim();
+        
+        if (!name || !url) {
+            alert('Please enter both name and URL');
+            return;
+        }
+        
+        if (!appState.vault[activeVaultKey]) {
+            appState.vault[activeVaultKey] = [];
+        }
+        
+        appState.vault[activeVaultKey].push({ n: name, u: url });
+        saveToGist();
+        renderVaultLinks();
+        switchVaultMode('view');
+        
+        // Update the vault button count in the table
+        updateVaultButtonCount(activeVaultKey);
+    }
+
+    function deleteSolution(idx) {
+        if (confirm('Delete this solution?')) {
+            appState.vault[activeVaultKey].splice(idx, 1);
+            saveToGist();
+            renderVaultLinks();
+            updateVaultButtonCount(activeVaultKey);
+        }
+    }
+
+    function updateVaultButtonCount(weekKey) {
+        // Find and update the vault button for this week
+        const vaultButtons = document.querySelectorAll(`.btn-solution[onclick*="${weekKey}"]`);
+        vaultButtons.forEach(btn => {
+            const count = (appState.vault[weekKey] || []).length;
+            btn.innerHTML = `<span>📁</span> Solution Vault (${count})`;
+        });
+    }
+
+    async function loadFromGist() {
+        updateSyncUI('loading');
+        
+        // Try to load from local backup first
+        const local = localStorage.getItem('sd_local_backup');
+        if (local) {
+            try {
+                const parsedLocal = JSON.parse(local);
+                // Ensure defaults so checks/vault are always defined
+                appState = Object.assign({ checks: {}, vault: {} }, parsedLocal);
+            } catch (e) {
+                console.error('Error parsing local backup:', e);
+                appState = { checks: {}, vault: {} };
             }
+        }
+        
+        // If no Gist config, just use local
+        if (!GIST_ID || !GH_TOKEN) {
+            renderAll();
+            updateSyncUI('local');
+            return;
+        }
+        
+        // Try to sync from Gist
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${GH_TOKEN}` }
+            });
+            
+            if (!res.ok) throw new Error('Failed to fetch Gist');
+            
+            const gist = await res.json();
+            const file = gist.files['sd_prep_v8.json'] || gist.files['progress_v3.json'];
+            
+            if (file) {
+                try {
+                    const parsed = JSON.parse(file.content);
+                    // Merge with defaults to avoid missing properties
+                    appState = Object.assign({ checks: {}, vault: {} }, parsed);
+                    updateSyncUI(true);
+                } catch (e) {
+                    console.error('Error parsing gist content:', e);
+                    appState = { checks: {}, vault: {} };
+                    updateSyncUI('error');
+                }
+            } else {
+                updateSyncUI('new');
+            }
+            
             renderAll();
             localStorage.setItem('sd_local_backup', JSON.stringify(appState));
         } catch (e) {
-            console.error(e);
-            updateSyncUI("error");
+            console.error('Sync error:', e);
+            renderAll(); // Still render with local data
+            updateSyncUI('error');
         }
     }
 
     async function saveToGist() {
-        renderAll();
+        // Save to local storage immediately
         localStorage.setItem('sd_local_backup', JSON.stringify(appState));
-        if (!GIST_ID || !GH_TOKEN) return;
-
-        updateSyncUI("saving");
+        
+        // Update UI
+        updateGlobalStats();
+        
+        // If no Gist config, don't try to sync
+        if (!GIST_ID || !GH_TOKEN) {
+            return;
+        }
+        
+        updateSyncUI('loading');
+        
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${GH_TOKEN}` },
-                body: JSON.stringify({ files: { "progress_v3.json": { content: JSON.stringify(appState) } } })
+                body: JSON.stringify({
+                    files: {
+                        "sd_prep_v8.json": {
+                            content: JSON.stringify(appState)
+                        }
+                    }
+                })
             });
             updateSyncUI(true);
         } catch (e) {
-            updateSyncUI("error");
+            console.error('Save error:', e);
+            updateSyncUI('error');
         }
     }
 
     function renderAll() {
-        ['phase1', 'phase2', 'phase3'].forEach(p => renderPhase(p, data[p]));
+        renderPhase('phase1', data.phase1, 'phase1-body');
+        renderPhase('phase2', data.phase2, 'phase2-body');
+        renderPhase('phase3', data.phase3, 'phase3-body');
         updateGlobalStats();
     }
 
-    function renderPhase(phaseId, weekData) {
-        const tbody = document.getElementById(phaseId + '-body');
+    function renderPhase(phaseId, weekData, targetId) {
+        const tbody = document.getElementById(targetId);
         tbody.innerHTML = '';
-
+        
         weekData.forEach((week, wIndex) => {
+            const weekKey = week.w;
             const tr = document.createElement('tr');
             
             let tasksHtml = `<div class="task-container">`;
             let completedCount = 0;
-
+            
             week.tasks.forEach((taskObj, tIndex) => {
                 const taskId = `${phaseId}-w${wIndex}-t${tIndex}`;
-                const isChecked = appState[taskId] === true;
-                if(isChecked) completedCount++;
-
+                const isChecked = appState.checks[taskId] === true;
+                if (isChecked) completedCount++;
+                
                 let tagClass = "tag-core";
-                if(taskObj.tag === "CODE") tagClass = "tag-code";
-                if(taskObj.tag === "MATH") tagClass = "tag-math";
-                if(taskObj.tag === "ACT") tagClass = "tag-act";
-
+                if (taskObj.tag === "CODE") tagClass = "tag-code";
+                if (taskObj.tag === "MATH") tagClass = "tag-math";
+                if (taskObj.tag === "ACT") tagClass = "tag-act";
+                if (taskObj.tag === "ADMIN") tagClass = "tag-admin";
+                if (taskObj.tag === "TEST") tagClass = "tag-test";
+                
                 tasksHtml += `
-                    <div class="task-item">
+                    <label class="task-item">
                         <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTask('${taskId}')">
                         <div>
                             <span class="tag ${tagClass}">${taskObj.tag}</span>
-                            <span style="${isChecked ? 'text-decoration:line-through; opacity:0.6' : ''}">${taskObj.txt}</span>
+                            <span style="${isChecked ? 'text-decoration: line-through; opacity: 0.7' : ''}">
+                                ${taskObj.txt}
+                            </span>
                         </div>
-                    </div>`;
+                    </label>`;
             });
             tasksHtml += `</div>`;
-
-            const resHtml = week.res.map(r => `<a href="${r.u}" target="_blank" class="resource-link">📄 ${r.t}</a>`).join('');
+            
+            // Add vault button
+            const vaultCount = (appState.vault[weekKey] || []).length;
+            tasksHtml += `<button class="btn-solution" onclick="openVault('${weekKey}')">
+                <span>📁</span> Solution Vault (${vaultCount})
+            </button>`;
+            
+            const resHtml = week.res.map(r => 
+                `<a href="${r.u}" target="_blank" class="resource-link">📄 ${r.t}</a>`
+            ).join('');
+            
             const isDone = completedCount === week.tasks.length;
-            if(isDone) tr.classList.add('done-row');
-
+            if (isDone) tr.classList.add('done-row');
+            
             tr.innerHTML = `
-                <td style="font-weight:700;">${week.w}</td>
-                <td><div style="font-weight:600; color:#334155">${week.focus}</div></td>
+                <td class="week-cell">${week.w}</td>
+                <td><div style="font-weight: 700; color: var(--text-main);">${week.focus}</div></td>
                 <td>${resHtml}</td>
                 <td>${tasksHtml}</td>
             `;
+            
             tbody.appendChild(tr);
         });
     }
 
     function toggleTask(taskId) {
-        appState[taskId] = !appState[taskId];
+        appState.checks[taskId] = !appState.checks[taskId];
         saveToGist();
+        
+        // Update row styling
+        const tr = event.target.closest('tr');
+        if (appState.checks[taskId]) {
+            // Check if all tasks in this row are now completed
+            const phaseId = taskId.split('-')[0];
+            const weekIndex = parseInt(taskId.split('-')[1].replace('w', ''));
+            const weekTasks = data[phaseId][weekIndex].tasks;
+            const allCompleted = weekTasks.every((_, tIndex) => 
+                appState.checks[`${phaseId}-w${weekIndex}-t${tIndex}`]
+            );
+            
+            if (allCompleted) {
+                tr.classList.add('done-row');
+            }
+        } else {
+            tr.classList.remove('done-row');
+        }
     }
 
     function updateGlobalStats() {
         let total = 0, done = 0;
+        
         ['phase1', 'phase2', 'phase3'].forEach(p => {
             data[p].forEach((week, wIndex) => {
                 week.tasks.forEach((_, tIndex) => {
                     total++;
-                    if(appState[`${p}-w${wIndex}-t${tIndex}`]) done++;
+                    if (appState.checks[`${p}-w${wIndex}-t${tIndex}`]) done++;
                 });
             });
         });
+        
         const pct = total === 0 ? 0 : Math.round((done / total) * 100);
         document.getElementById('globalProgress').style.width = pct + '%';
         document.getElementById('globalStats').innerText = `${pct}%`;
     }
 
     function updateSyncUI(status) {
-        const el = document.getElementById('syncStatus');
-        if(status === "loading") el.innerText = "🔄 Syncing...";
-        else if(status === "saving") el.innerText = "☁️ Saving...";
-        else if(status === "new") { el.innerText = "✅ New Gist"; el.style.color="#4ade80"; }
-        else if(status === "error") { el.innerText = "❌ Error"; el.style.color="#f87171"; }
-        else if(status === true) { el.innerText = "✅ Synced"; el.style.color="#4ade80"; }
-        else { el.innerText = "⚪ Local"; el.style.color="white"; }
-    }
-
-    function toggleModal() { 
-        document.getElementById('configModal').classList.toggle('active');
-        if(document.getElementById('configModal').classList.contains('active')) {
-            document.getElementById('gistIdInput').value = GIST_ID;
-            document.getElementById('tokenInput').value = GH_TOKEN;
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        
+        dot.className = 'status-dot';
+        
+        if (status === 'loading') {
+            text.innerText = 'Syncing...';
+            dot.style.background = '#fbbf24';
+            dot.style.animation = 'pulse 1.5s infinite';
+        } else if (status === 'local') {
+            text.innerText = 'Local Mode';
+            dot.style.background = 'var(--dot-offline)';
+            dot.style.animation = 'none';
+        } else if (status === 'error') {
+            text.innerText = 'Sync Error';
+            dot.classList.add('error');
+            dot.style.animation = 'none';
+        } else if (status === true) {
+            text.innerText = 'Synced';
+            dot.classList.add('online');
+            dot.style.animation = 'none';
+        } else if (status === 'new') {
+            text.innerText = 'New Gist';
+            dot.classList.add('online');
+            dot.style.animation = 'pulse 1.5s infinite';
         }
     }
-    
-    // UPDATED: Handle Form Submit for DOM compliance
-    function saveConfig(event) {
-        if(event) event.preventDefault();
+
+    function saveConfig(e) {
+        e.preventDefault();
         
         GIST_ID = document.getElementById('gistIdInput').value.trim();
         GH_TOKEN = document.getElementById('tokenInput').value.trim();
+        
         localStorage.setItem('sd_gist_id', GIST_ID);
         localStorage.setItem('sd_gh_token', GH_TOKEN);
         
-        toggleModal();
+        toggleModal('configModal');
         loadFromGist();
     }
     
     function openTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Show selected tab content
         document.getElementById(tabName).classList.add('active');
-        const btns = document.querySelectorAll('.tab-btn');
-        if(tabName.includes('1')) btns[0].classList.add('active');
-        if(tabName.includes('2')) btns[1].classList.add('active');
-        if(tabName.includes('3')) btns[2].classList.add('active');
+        
+        // Activate clicked tab button
+        event.target.classList.add('active');
     }
 
-    // Load on init
+    // Initialize
     loadFromGist();
 </script>
 </body>
